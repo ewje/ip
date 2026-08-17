@@ -8,7 +8,7 @@ public class Duke {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String userInput;
-        String[] userList = new String[100];
+        Task[] userList = new Task[100];
         int count = 0;
 
         String banner = """
@@ -31,9 +31,10 @@ public class Duke {
         System.out.println(banner + greeting);
 
         while (true) {
-            userInput = scanner.nextLine();
+            userInput = scanner.nextLine().trim();
+            String[] userSplit = userInput.split(" ");
 
-            switch (userInput) {
+            switch (userSplit[0]) {
                 case "bye":
                     System.out.println(goodbye);
                     return;
@@ -44,15 +45,44 @@ public class Duke {
                     }
                     printLine();
                     break;
+                case "mark":
+                    if(userSplit.length < 2) {
+                        System.out.println("Please indicate which task to mark!");
+                        break;
+                    }
+
+                    int done = Integer.parseInt(userSplit[1]);
+
+                    userList[done - 1].markAsDone();
+
+                    printLine();
+                    System.out.println("Gary marked task " + done + " as done!");
+                    printLine();
+
+                    break;
+                case "unmark":
+                    if(userSplit.length < 2) {
+                        System.out.println("Please indicate which task to unmark!");
+                        break;
+                    }
+
+                    int undone = Integer.parseInt(userSplit[1]);
+
+                    userList[undone - 1].markUndone();
+
+                    printLine();
+                    System.out.println("Gary marked task " + undone + " as undone!");
+                    printLine();
+
+                    break;
                 default:
-                    userList[count] = userInput;
+                    userList[count] = new Task(userInput);
                     count++;
                     printLine();
                     System.out.println("User Input: " + userInput);
                     printLine();
                     break;
             }
-
         }
     }
 }
