@@ -7,7 +7,9 @@ public class Duke {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String user;
+        String userInput;
+        String[] userList = new String[100];
+        int count = 0;
 
         String banner = """
                  ==================================================================\s
@@ -29,15 +31,28 @@ public class Duke {
         System.out.println(banner + greeting);
 
         while (true) {
-            user = scanner.nextLine();
+            userInput = scanner.nextLine();
 
-            if (user.equals("bye")) {
-                System.out.println(goodbye);
-                break;
+            switch (userInput) {
+                case "bye":
+                    System.out.println(goodbye);
+                    return;
+                case "list":
+                    printLine();
+                    for(int i = 0; i < count; i++) {
+                        System.out.println((i + 1) + ". " + userList[i]);
+                    }
+                    printLine();
+                    break;
+                default:
+                    userList[count] = userInput;
+                    count++;
+                    printLine();
+                    System.out.println("User Input: " + userInput);
+                    printLine();
+                    break;
             }
-            printLine();
-            System.out.println("User Input: " + user);
-            printLine();
+
         }
     }
 }
