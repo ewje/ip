@@ -1,5 +1,14 @@
+import java.util.Scanner;
+
 public class Duke {
+    private static void printLine() {
+        System.out.println("____________________________________________________________");
+    }
+
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String user;
+
         String banner = """
                  ==================================================================\s
                   ____                 \s
@@ -17,7 +26,18 @@ public class Duke {
                 """;
         String goodbye = "Bye! Hope to see you again soon!\n";
 
-        System.out.println(banner + greeting + goodbye);
+        System.out.println(banner + greeting);
 
+        while (true) {
+            user = scanner.nextLine();
+
+            if (user.equals("bye")) {
+                System.out.println(goodbye);
+                break;
+            }
+            printLine();
+            System.out.println("User Input: " + user);
+            printLine();
+        }
     }
 }
