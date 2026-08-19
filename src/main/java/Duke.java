@@ -1,8 +1,8 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Duke {
-    private static Task[] userList = new Task[100];
-    private static int count = 0;
+    private static ArrayList<Task> userList = new ArrayList<>();
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -41,8 +41,8 @@ public class Duke {
                     case "list":
                         printLine();
                         System.out.println("These are the tasks you have in your list!");
-                        for (int i = 0; i < count; i++) {
-                            System.out.println((i + 1) + ". " + userList[i]);
+                        for (int i = 0; i < userList.size(); i++) {
+                            System.out.println((i + 1) + ". " + userList.get(i));
                         }
                         printLine();
                         break;
@@ -60,6 +60,9 @@ public class Duke {
                         break;
                     case "event":
                         setEvent(arguments);
+                        break;
+                    case "delete":
+                        deleteTask(arguments);
                         break;
                     default:
                         throw new GaryException("I'm sorry, but Gary doesn't know what that means!");
@@ -79,12 +82,12 @@ public class Duke {
         int task = Integer.parseInt(argument) - 1;
 
         if (isDone) {
-            userList[task].markAsDone();
+            userList.get(task).markAsDone();
         } else {
-            userList[task].markUndone();
+            userList.get(task).markUndone();
         }
         printLine();
-        System.out.println("Gary marked task " + task + ((isDone) ? " as done!": " as undone!"));
+        System.out.println("Gary marked task " + (task + 1) + ((isDone) ? " as done!": " as undone!"));
         printLine();
     }
 
@@ -94,7 +97,7 @@ public class Duke {
             System.out.println("The Todo description cannot be empty!");
             printLine();
         } else {
-            userList[count] = new ToDo(argument);
+            userList.add(new ToDo(argument));
             printTask();
         }
     }
@@ -110,9 +113,8 @@ public class Duke {
         } else {
             String[] task = argument.split("/by");
 
-            userList[count] = new Deadline(task[0], task[1]);
+            userList.add(new Deadline(task[0], task[1]));
             printTask();
-            count++;
         }
     }
 
@@ -129,8 +131,33 @@ public class Duke {
 
             String[] times = task[1].split("/to");
 
-            userList[count] = new Event(task[0], times[0], times[1]);
+            userList.add(new Event(task[0], times[0], times[1]));
             printTask();
+        }
+    }
+
+    private static void deleteTask(String argument) {
+        if (argument.isEmpty()) {
+            throw new GaryException("Please indicate which task number to delete!");
+        }
+
+        try {
+            int taskIndex = Integer.parseInt(argument) - 1;
+
+            if (taskIndex < 0 || taskIndex >= userList.size()) {
+                throw new GaryException("I can't find a task with that number!");
+            }
+
+            Task removedTask = userList.remove(taskIndex);
+
+            printLine();
+            System.out.println("Noted. This task has been removed:");
+            System.out.println("  " + removedTask);
+            System.out.println("Now you have " + userList.size() + " tasks in the list.");
+            printLine();
+
+        } catch (NumberFormatException e) {
+            throw new GaryException("Please provide a valid number.");
         }
     }
 
@@ -141,9 +168,8 @@ public class Duke {
     private static void printTask() {
         printLine();
         System.out.println("Got it! Here's the task you added:\n"
-                + "  " + userList[count].toString()
-                + "\nNow you have " + (count + 1) + " tasks in your list!");
-        count++;
+                + "  " + userList.getLast().toString()
+                + "\nNow you have " + userList.size() + " tasks in your list!");
         printLine();
     }
 
