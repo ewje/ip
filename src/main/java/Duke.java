@@ -32,41 +32,42 @@ public class Duke {
             String command = userSplit[0];
             String arguments = (userSplit.length > 1) ? userSplit[1] : "";
 
-            switch (command) {
-                case "bye":
-                    System.out.println(goodbye);
-                    scanner.close();
-                    return;
-                case "list":
-                    printLine();
-                    System.out.println("These are the tasks you have in your list!");
-                    for(int i = 0; i < count; i++) {
-                        System.out.println((i + 1) + ". " + userList[i]);
-                    }
-                    printLine();
-                    break;
-                case "mark":
-                    setTaskStatus(arguments, true);
-                    break;
-                case "unmark":
-                    setTaskStatus(arguments, false);
-                    break;
-                case "todo":
-                    setTodo(arguments);
-                    break;
-                case "deadline":
-                    setDeadline(arguments);
-                    break;
-                case "event":
-                    setEvent(arguments);
-                    break;
-                default:
-                    userList[count] = new Task(userInput);
-                    count++;
-                    printLine();
-                    System.out.println("User Input: " + userInput);
-                    printLine();
-                    break;
+            try {
+                switch (command) {
+                    case "bye":
+                        System.out.println(goodbye);
+                        scanner.close();
+                        return;
+                    case "list":
+                        printLine();
+                        System.out.println("These are the tasks you have in your list!");
+                        for (int i = 0; i < count; i++) {
+                            System.out.println((i + 1) + ". " + userList[i]);
+                        }
+                        printLine();
+                        break;
+                    case "mark":
+                        setTaskStatus(arguments, true);
+                        break;
+                    case "unmark":
+                        setTaskStatus(arguments, false);
+                        break;
+                    case "todo":
+                        setTodo(arguments);
+                        break;
+                    case "deadline":
+                        setDeadline(arguments);
+                        break;
+                    case "event":
+                        setEvent(arguments);
+                        break;
+                    default:
+                        throw new GaryException("I'm sorry, but Gary doesn't know what that means!");
+                }
+            } catch (GaryException e) {
+                printLine();
+                System.out.println(e.getMessage());
+                printLine();
             }
         }
     }
@@ -91,6 +92,7 @@ public class Duke {
         if (argument.isEmpty()) {
             printLine();
             System.out.println("The Todo description cannot be empty!");
+            printLine();
         } else {
             userList[count] = new ToDo(argument);
             printTask();
@@ -99,10 +101,12 @@ public class Duke {
 
     private static void setDeadline(String argument) {
         if (!argument.contains(" /by ")) {
+            printLine();
             System.out.println("""
                     The Deadline description and due date cannot be empty!
                     Use ' /by ' to indicate a deadline!
                     """);
+            printLine();
         } else {
             String[] task = argument.split("/by");
 
@@ -114,10 +118,12 @@ public class Duke {
 
     private static void setEvent(String argument) {
         if (!argument.contains(" /from ") || !argument.contains(" /to ")) {
+            printLine();
             System.out.println("""
                     The Event description and times cannot be empty!
                     Use ' /from ' and ' /to ' to indicate start and end times!
                     """);
+            printLine();
         } else {
             String[] task = argument.split("/from");
 
