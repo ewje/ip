@@ -4,6 +4,18 @@ import java.util.Scanner;
 public class Duke {
     private static ArrayList<Task> userList = new ArrayList<>();
 
+    public enum Command {
+        BYE, LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, UNKNOWN;
+
+        public static Command fromString(String text) {
+            try {
+                return Command.valueOf(text.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return UNKNOWN;
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String banner = """
@@ -29,16 +41,16 @@ public class Duke {
             String userInput = scanner.nextLine().trim();
 
             String[] userSplit = userInput.split(" ", 2);
-            String command = userSplit[0];
+            Command command = Command.fromString(userSplit[0]);
             String arguments = (userSplit.length > 1) ? userSplit[1] : "";
 
             try {
                 switch (command) {
-                    case "bye":
+                    case BYE:
                         System.out.println(goodbye);
                         scanner.close();
                         return;
-                    case "list":
+                    case LIST:
                         printLine();
                         System.out.println("These are the tasks you have in your list!");
                         for (int i = 0; i < userList.size(); i++) {
@@ -46,24 +58,25 @@ public class Duke {
                         }
                         printLine();
                         break;
-                    case "mark":
+                    case MARK:
                         setTaskStatus(arguments, true);
                         break;
-                    case "unmark":
+                    case UNMARK":
                         setTaskStatus(arguments, false);
                         break;
-                    case "todo":
+                    case TODO:
                         setTodo(arguments);
                         break;
-                    case "deadline":
+                    case DEADLINE:
                         setDeadline(arguments);
                         break;
-                    case "event":
+                    case EVENT:
                         setEvent(arguments);
                         break;
-                    case "delete":
+                    case DELETE:
                         deleteTask(arguments);
                         break;
+                    case UNKNOWN:
                     default:
                         throw new GaryException("I'm sorry, but Gary doesn't know what that means!");
                 }
