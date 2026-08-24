@@ -1,5 +1,0 @@
-interface:
-  display_name: "Test UI"
-  short_description: "Run UI test cases from a markdown plan"
-  default_prompt: "Use $test-ui to run the UI tests in test/ui-test-plan.md and report the transcript and any failures."
-
