@@ -1,0 +1,3 @@
+T | 1 | keep me
+T | 0 | read book
+D | 0 | sleep | tomorrow

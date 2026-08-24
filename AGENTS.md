@@ -33,3 +33,16 @@ Ensure that Java 25 is used when running the application or build tasks. On macO
 Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
+
+## After code updates: UI tests
+
+After any change that affects user-visible CLI behavior (commands, prompts, messages, formatting, error text, etc.):
+
+1. Update `test/ui-test-plan.md` as needed:
+   - Add/adjust test cases so expected outputs match the new behavior.
+   - Each test case must state its `aim`, inputs (`cmd`/`stdin`), and `expected` output.
+2. Invoke the `test-ui` workflow:
+   - Prefer using the `test-ui` skill when available.
+   - Otherwise run `python3 scripts/run-ui-tests.py`.
+
+When reporting results, include the session transcript path (`_temp/ui-test-session.txt`). If a test fails, stop immediately and report where to find the actual vs expected output files (`_temp/ui-test-actual.txt`, `_temp/ui-test-expected.txt`).
