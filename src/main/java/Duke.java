@@ -2,8 +2,11 @@ import java.util.ArrayList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
+import java.time.LocalDate;
 
 public class Duke {
     private static ArrayList<Task> userList = new ArrayList<>();
@@ -154,17 +157,22 @@ public class Duke {
             return;
         }
 
-        userList.add(new Deadline(task[0].trim(), task[1].trim()));
-        saveTasks();
-        printTask();
+        try {
+            LocalDate deadlineDate = LocalDate.parse(task[1].trim());
+            userList.add(new Deadline(task[0].trim(), deadlineDate));
+            saveTasks();
+            printTask();
+        } catch (DateTimeParseException e) {
+            showError("Please provide a valid deadline in the format YYYY-MM-DD.");
+        }
     }
 
     private static void setEvent(String argument) {
         String[] task = argument.split(" /from ", 2);
         if (task.length < 2) {
             showError("""
-                    The Event description and times cannot be empty!
-                    Use ' /from ' and ' /to ' to indicate start and end times!
+                    The Event description and dates cannot be empty!
+                    Use ' /from ' and ' /to ' to indicate start and end dates!
                     """);
             return;
         }
@@ -172,15 +180,22 @@ public class Duke {
         String[] times = task[1].split(" /to ", 2);
         if (task[0].trim().isEmpty() || times.length < 2 || times[0].trim().isEmpty() || times[1].trim().isEmpty()) {
             showError("""
-                    The Event description and times cannot be empty!
-                    Use ' /from ' and ' /to ' to indicate start and end times!
+                    The Event description and dates cannot be empty!
+                    Use ' /from ' and ' /to ' to indicate start and end dates!
                     """);
             return;
         }
 
-        userList.add(new Event(task[0].trim(), times[0].trim(), times[1].trim()));
-        saveTasks();
-        printTask();
+        try{
+            LocalDate start = LocalDate.parse(times[0].trim());
+            LocalDate end = LocalDate.parse(times[1].trim());
+
+            userList.add(new Event(task[0].trim(), start, end));
+            saveTasks();
+            printTask();
+        } catch (DateTimeParseException e) {
+            showError("Please provide valid start and end dates in the format YYYY-MM-DD.");
+        }
     }
 
     private static void deleteTask(String argument) {
@@ -264,13 +279,16 @@ public class Duke {
                         if (parts.length < 4) {
                             yield null;
                         }
-                        yield new Deadline(description, parts[3].trim());
+                        yield new Deadline(description, LocalDate.parse(parts[3].trim()));
                     }
                     case "E" -> {
                         if (parts.length < 5) {
                             yield null;
                         }
-                        yield new Event(description, parts[3].trim(), parts[4].trim());
+                        yield new Event(
+                                description,
+                                LocalDate.parse(parts[3].trim()),
+                                LocalDate.parse(parts[4].trim()));
                     }
                     default -> null;
                 };
