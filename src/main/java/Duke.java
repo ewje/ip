@@ -7,18 +7,7 @@ public class Duke {
     private static ArrayList<Task> userList = new ArrayList<>();
     private static final Storage storage = new Storage("data/duke.txt");
     private static final Ui ui = new Ui();
-
-    public enum Command {
-        BYE, LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, UNKNOWN;
-
-        public static Command fromString(String text) {
-            try {
-                return Command.valueOf(text.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                return UNKNOWN;
-            }
-        }
-    }
+    private static final Parser parser = new Parser();
 
     public static void main(String[] args) {
         userList = storage.load();
@@ -38,12 +27,10 @@ public class Duke {
                 continue;
             }
 
-            String[] userSplit = userInput.split(" ", 2);
-            Command command = Command.fromString(userSplit[0]);
-            String arguments = (userSplit.length > 1) ? userSplit[1] : "";
+            Parser.ParseResult parsed = parser.parse(userInput);
 
             try {
-                switch (command) {
+                switch (parsed.command()) {
                     case BYE:
                         storage.save(userList);
                         ui.showGoodbye();
@@ -53,22 +40,22 @@ public class Duke {
                         ui.showTaskList(userList);
                         break;
                     case MARK:
-                        setTaskStatus(arguments, true);
+                        setTaskStatus(parsed.arguments(), true);
                         break;
                     case UNMARK:
-                        setTaskStatus(arguments, false);
+                        setTaskStatus(parsed.arguments(), false);
                         break;
                     case TODO:
-                        setTodo(arguments);
+                        setTodo(parsed.arguments());
                         break;
                     case DEADLINE:
-                        setDeadline(arguments);
+                        setDeadline(parsed.arguments());
                         break;
                     case EVENT:
-                        setEvent(arguments);
+                        setEvent(parsed.arguments());
                         break;
                     case DELETE:
-                        deleteTask(arguments);
+                        deleteTask(parsed.arguments());
                         break;
                     case UNKNOWN:
                     default:
