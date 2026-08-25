@@ -3,19 +3,25 @@ import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class Duke {
-    private static TaskList tasks = new TaskList();
-    private static final Storage storage = new Storage("data/duke.txt");
-    private static final Ui ui = new Ui();
-    private static final Parser parser = new Parser();
+    private final TaskList tasks;
+    private final Ui ui;
+    private final Parser parser;
 
-    public static void main(String[] args) {
-        tasks = new TaskList(storage.load());
+    public Duke(String filePath) {
+        this.ui = new Ui();
+        Storage storage = new Storage(filePath);
+        this.parser = new Parser();
+        this.tasks = new TaskList(storage.load());
+        this.tasks.setStorage(storage);
+    }
+
+    public void run() {
         Scanner scanner = new Scanner(System.in);
         ui.showWelcome();
 
         while (true) {
             if (!scanner.hasNextLine()) {
-                storage.save(tasks.asList());
+                tasks.save();
                 scanner.close();
                 return;
             }
@@ -31,7 +37,7 @@ public class Duke {
             try {
                 switch (parsed.command()) {
                     case BYE:
-                        storage.save(tasks.asList());
+                        tasks.save();
                         ui.showGoodbye();
                         scanner.close();
                         return;
@@ -66,7 +72,7 @@ public class Duke {
         }
     }
 
-    private static void setTaskStatus(String argument, boolean isDone) {
+    private void setTaskStatus(String argument, boolean isDone) {
         if (argument.isBlank()) {
             throw new GaryException("Please indicate which task number to update!");
         }
@@ -80,11 +86,10 @@ public class Duke {
 
         tasks.validateIndex(task);
         tasks.mark(task, isDone);
-        storage.save(tasks.asList());
         ui.showMarkedTask(task + 1, isDone);
     }
 
-    private static void setTodo(String argument) {
+    private void setTodo(String argument) {
         String description = argument.trim();
         if (description.isEmpty()) {
             ui.showError("The Todo description cannot be empty!");
@@ -92,11 +97,10 @@ public class Duke {
         }
 
         tasks.addTodo(description);
-        storage.save(tasks.asList());
         ui.showTaskAdded(tasks.getLast(), tasks.size());
     }
 
-    private static void setDeadline(String argument) {
+    private void setDeadline(String argument) {
         String[] task = argument.split(" /by ", 2);
         if (task.length < 2 || task[0].trim().isEmpty() || task[1].trim().isEmpty()) {
             ui.showError("""
@@ -109,14 +113,13 @@ public class Duke {
         try {
             LocalDate deadlineDate = LocalDate.parse(task[1].trim());
             tasks.addDeadline(task[0].trim(), deadlineDate);
-            storage.save(tasks.asList());
             ui.showTaskAdded(tasks.getLast(), tasks.size());
         } catch (DateTimeParseException e) {
             ui.showError("Please provide a valid deadline in the format YYYY-MM-DD.");
         }
     }
 
-    private static void setEvent(String argument) {
+    private void setEvent(String argument) {
         String[] task = argument.split(" /from ", 2);
         if (task.length < 2) {
             ui.showError("""
@@ -135,19 +138,18 @@ public class Duke {
             return;
         }
 
-        try{
+        try {
             LocalDate start = LocalDate.parse(times[0].trim());
             LocalDate end = LocalDate.parse(times[1].trim());
 
             tasks.addEvent(task[0].trim(), start, end);
-            storage.save(tasks.asList());
             ui.showTaskAdded(tasks.getLast(), tasks.size());
         } catch (DateTimeParseException e) {
             ui.showError("Please provide valid start and end dates in the format YYYY-MM-DD.");
         }
     }
 
-    private static void deleteTask(String argument) {
+    private void deleteTask(String argument) {
         if (argument.isBlank()) {
             throw new GaryException("Please indicate which task number to delete!");
         }
@@ -158,13 +160,13 @@ public class Duke {
             tasks.validateIndex(taskIndex);
 
             Task removedTask = tasks.remove(taskIndex);
-            storage.save(tasks.asList());
-
             ui.showTaskRemoved(removedTask, tasks.size());
-
         } catch (NumberFormatException e) {
             throw new GaryException("Please provide a valid number.");
         }
     }
 
+    public static void main(String[] args) {
+        new Duke("data/duke.txt").run();
+    }
 }

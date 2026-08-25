@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class TaskList {
     private final ArrayList<Task> tasks;
+    private Storage storage;
 
     public TaskList() {
         this.tasks = new ArrayList<>();
@@ -9,6 +10,10 @@ public class TaskList {
 
     public TaskList(ArrayList<Task> tasks) {
         this.tasks = tasks;
+    }
+
+    public void setStorage(Storage storage) {
+        this.storage = storage;
     }
 
     public int size() {
@@ -29,18 +34,23 @@ public class TaskList {
 
     public void addTodo(String description) {
         tasks.add(new ToDo(description));
+        save();
     }
 
     public void addDeadline(String description, java.time.LocalDate deadline) {
         tasks.add(new Deadline(description, deadline));
+        save();
     }
 
     public void addEvent(String description, java.time.LocalDate start, java.time.LocalDate end) {
         tasks.add(new Event(description, start, end));
+        save();
     }
 
     public Task remove(int index) {
-        return tasks.remove(index);
+        Task removedTask = tasks.remove(index);
+        save();
+        return removedTask;
     }
 
     public void mark(int index, boolean isDone) {
@@ -49,6 +59,7 @@ public class TaskList {
         } else {
             tasks.get(index).markUndone();
         }
+        save();
     }
 
     public void validateIndex(int index) {
@@ -59,5 +70,11 @@ public class TaskList {
 
     public ArrayList<Task> asList() {
         return tasks;
+    }
+
+    public void save() {
+        if (storage != null) {
+            storage.save(tasks);
+        }
     }
 }
