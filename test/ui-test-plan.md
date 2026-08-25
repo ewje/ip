@@ -147,9 +147,9 @@ expected: |
 ```ui-test
 id: TC5
 aim: Verify a deadline command stores the due date and confirms it.
-cmd: sh -c "rm -f data/duke.txt; printf 'deadline submit report /by Friday\nbye\n' | java -cp out/production/ip Duke"
+cmd: sh -c "rm -f data/duke.txt; printf 'deadline submit report /by 2026-06-06\nbye\n' | java -cp out/production/ip Duke"
 stdin: |
-  deadline submit report /by Friday
+  deadline submit report /by 2026-06-06
   bye
 expected: |
    ================================================================== 
@@ -166,7 +166,7 @@ expected: |
 
   ____________________________________________________________
   Got it! Here's the task you added:
-    [D] [ ] submit report (by: Friday)
+    [D] [ ] submit report (by: 2026-06-06)
   Now you have 1 tasks in your list!
   ____________________________________________________________
   Bye! Hope to see you again soon!
@@ -177,9 +177,9 @@ expected: |
 ```ui-test
 id: TC6
 aim: Verify an event command stores the start and end times and confirms it.
-cmd: sh -c "rm -f data/duke.txt; printf 'event project meeting /from 2pm /to 3pm\nbye\n' | java -cp out/production/ip Duke"
+cmd: sh -c "rm -f data/duke.txt; printf 'event project meeting /from 2026-08-06 /to 2026-08-07\nbye\n' | java -cp out/production/ip Duke"
 stdin: |
-  event project meeting /from 2pm /to 3pm
+  event project meeting /from 2026-08-06 /to 2026-08-07
   bye
 expected: |
    ================================================================== 
@@ -196,7 +196,7 @@ expected: |
 
   ____________________________________________________________
   Got it! Here's the task you added:
-    [E] [ ] project meeting (from: 2pm to: 3pm)
+    [E] [ ] project meeting (from: 2026-08-06 to: 2026-08-07)
   Now you have 1 tasks in your list!
   ____________________________________________________________
   Bye! Hope to see you again soon!
@@ -238,7 +238,7 @@ expected: |
 ```ui-test
 id: TC8
 aim: Verify the app loads saved tasks from the hard disk on startup.
-cmd: sh -c "printf 'T | 1 | read book\nD | 0 | return book | June 6th\n' > data/duke.txt; printf 'list\nbye\n' | java -cp out/production/ip Duke"
+cmd: sh -c "printf 'T | 1 | read book\nD | 0 | return book | 2026-06-06\n' > data/duke.txt; printf 'list\nbye\n' | java -cp out/production/ip Duke"
 expected: |
    ================================================================== 
     ____                  
@@ -255,7 +255,7 @@ expected: |
   ____________________________________________________________
   These are the tasks you have in your list!
   1. [T] [X] read book
-  2. [D] [ ] return book (by: June 6th)
+  2. [D] [ ] return book (by: 2026-06-06)
   ____________________________________________________________
   Bye! Hope to see you again soon!
 ```
@@ -397,8 +397,8 @@ expected: |
   (Type bye to exit)
 
   ____________________________________________________________
-  The Event description and times cannot be empty!
-  Use ' /from ' and ' /to ' to indicate start and end times!
+  The Event description and dates cannot be empty!
+  Use ' /from ' and ' /to ' to indicate start and end dates!
   
   ____________________________________________________________
   Bye! Hope to see you again soon!

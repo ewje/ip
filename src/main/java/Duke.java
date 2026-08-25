@@ -6,11 +6,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
-import java.time.LocalDate;
 
 public class Duke {
     private static ArrayList<Task> userList = new ArrayList<>();
     private static final Path DATA_FILE = Path.of("data", "duke.txt");
+    private static final Ui ui = new Ui();
 
     public enum Command {
         BYE, LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, UNKNOWN;
@@ -27,24 +27,7 @@ public class Duke {
     public static void main(String[] args) {
         loadTasks();
         Scanner scanner = new Scanner(System.in);
-        String banner = """
-                 ==================================================================\s
-                  ____                 \s
-                 / ___| __ _ _ __ _   _\s
-                | |  _ / _` | '__| | | |
-                | |_| | (_| | |  | |_| |
-                 \\____|\\__,_|_|   \\__, |
-                                  |___/\s
-                 ==================================================================\s
-                """;
-        String greeting = """
-                HELLO! I'm GARY!
-                How can I help you today?
-                (Type bye to exit)
-                """;
-        String goodbye = "Bye! Hope to see you again soon!\n";
-
-        System.out.println(banner + greeting);
+        ui.showWelcome();
 
         while (true) {
             if (!scanner.hasNextLine()) {
@@ -55,7 +38,7 @@ public class Duke {
 
             String userInput = scanner.nextLine().trim();
             if (userInput.isEmpty()) {
-                showError("Please enter a command.");
+                ui.showEmptyInputError();
                 continue;
             }
 
@@ -67,16 +50,11 @@ public class Duke {
                 switch (command) {
                     case BYE:
                         saveTasks();
-                        System.out.println(goodbye);
+                        ui.showGoodbye();
                         scanner.close();
                         return;
                     case LIST:
-                        printLine();
-                        System.out.println("These are the tasks you have in your list!");
-                        for (int i = 0; i < userList.size(); i++) {
-                            System.out.println((i + 1) + ". " + userList.get(i));
-                        }
-                        printLine();
+                        ui.showTaskList(userList);
                         break;
                     case MARK:
                         setTaskStatus(arguments, true);
@@ -101,9 +79,7 @@ public class Duke {
                         throw new GaryException("I'm sorry, but Gary doesn't know what that means!");
                 }
             } catch (GaryException e) {
-                printLine();
-                System.out.println(e.getMessage());
-                printLine();
+                ui.showError(e.getMessage());
             }
         }
     }
@@ -130,27 +106,25 @@ public class Duke {
             userList.get(task).markUndone();
         }
         saveTasks();
-        printLine();
-        System.out.println("Gary marked task " + (task + 1) + ((isDone) ? " as done!": " as undone!"));
-        printLine();
+        ui.showMarkedTask(task + 1, isDone);
     }
 
     private static void setTodo(String argument) {
         String description = argument.trim();
         if (description.isEmpty()) {
-            showError("The Todo description cannot be empty!");
+            ui.showError("The Todo description cannot be empty!");
             return;
         }
 
         userList.add(new ToDo(description));
         saveTasks();
-        printTask();
+        ui.showTaskAdded(userList.getLast(), userList.size());
     }
 
     private static void setDeadline(String argument) {
         String[] task = argument.split(" /by ", 2);
         if (task.length < 2 || task[0].trim().isEmpty() || task[1].trim().isEmpty()) {
-            showError("""
+            ui.showError("""
                     The Deadline description and due date cannot be empty!
                     Use ' /by ' to indicate a deadline!
                     """);
@@ -161,16 +135,16 @@ public class Duke {
             LocalDate deadlineDate = LocalDate.parse(task[1].trim());
             userList.add(new Deadline(task[0].trim(), deadlineDate));
             saveTasks();
-            printTask();
+            ui.showTaskAdded(userList.getLast(), userList.size());
         } catch (DateTimeParseException e) {
-            showError("Please provide a valid deadline in the format YYYY-MM-DD.");
+            ui.showError("Please provide a valid deadline in the format YYYY-MM-DD.");
         }
     }
 
     private static void setEvent(String argument) {
         String[] task = argument.split(" /from ", 2);
         if (task.length < 2) {
-            showError("""
+            ui.showError("""
                     The Event description and dates cannot be empty!
                     Use ' /from ' and ' /to ' to indicate start and end dates!
                     """);
@@ -179,7 +153,7 @@ public class Duke {
 
         String[] times = task[1].split(" /to ", 2);
         if (task[0].trim().isEmpty() || times.length < 2 || times[0].trim().isEmpty() || times[1].trim().isEmpty()) {
-            showError("""
+            ui.showError("""
                     The Event description and dates cannot be empty!
                     Use ' /from ' and ' /to ' to indicate start and end dates!
                     """);
@@ -192,9 +166,9 @@ public class Duke {
 
             userList.add(new Event(task[0].trim(), start, end));
             saveTasks();
-            printTask();
+            ui.showTaskAdded(userList.getLast(), userList.size());
         } catch (DateTimeParseException e) {
-            showError("Please provide valid start and end dates in the format YYYY-MM-DD.");
+            ui.showError("Please provide valid start and end dates in the format YYYY-MM-DD.");
         }
     }
 
@@ -213,31 +187,11 @@ public class Duke {
             Task removedTask = userList.remove(taskIndex);
             saveTasks();
 
-            printLine();
-            System.out.println("Noted. This task has been removed:");
-            System.out.println("  " + removedTask);
-            System.out.println("Now you have " + userList.size() + " tasks in the list.");
-            printLine();
+            ui.showTaskRemoved(removedTask, userList.size());
 
         } catch (NumberFormatException e) {
             throw new GaryException("Please provide a valid number.");
         }
-    }
-
-    private static void printLine() {
-        System.out.println("____________________________________________________________");
-    }
-
-    private static void printTask() {
-        printLine();
-        System.out.println("Got it! Here's the task you added:\n"
-                + "  " + userList.getLast().toString()
-                + "\nNow you have " + userList.size() + " tasks in your list!");
-        printLine();
-    }
-
-    private static void printNullError() {
-        System.out.println("Please include details of the task!");
     }
 
     private static void saveTasks() {
@@ -249,7 +203,7 @@ public class Duke {
             }
             Files.write(DATA_FILE, lines);
         } catch (IOException e) {
-            throw new GaryException("Could not save tasks to disk.");
+            ui.showError("Could not save tasks to disk.");
         }
     }
 
@@ -301,14 +255,7 @@ public class Duke {
                 }
             }
         } catch (IOException e) {
-            showError("Could not load tasks from disk.");
+            ui.showError("Could not load tasks from disk.");
         }
     }
-
-    private static void showError(String message) {
-        printLine();
-        System.out.println(message);
-        printLine();
-    }
-
 }
