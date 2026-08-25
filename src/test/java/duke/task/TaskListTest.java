@@ -90,5 +90,32 @@ public class TaskListTest {
 
         assertThrows(GaryException.class, () -> tasks.validateIndex(1));
     }
-}
 
+    @Test
+    public void findByKeyword_keywordMatches_returnsMatchingTasksInOrder() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+        tasks.addTodo("write notes");
+        tasks.addTodo("return book");
+
+        assertEquals(2, tasks.findByKeyword("book").size());
+        assertEquals("T | 0 | read book", tasks.findByKeyword("book").get(0).toDataString());
+        assertEquals("T | 0 | return book", tasks.findByKeyword("book").get(1).toDataString());
+    }
+
+    @Test
+    public void findByKeyword_caseInsensitive_matchesTasks() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+
+        assertEquals(1, tasks.findByKeyword("BOOK").size());
+    }
+
+    @Test
+    public void findByKeyword_noMatches_returnsEmptyList() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+
+        assertEquals(0, tasks.findByKeyword("xyz").size());
+    }
+}

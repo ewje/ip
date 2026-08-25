@@ -164,6 +164,27 @@ public class TaskList {
     }
 
     /**
+     * Finds tasks whose descriptions contain the given keyword.
+     *
+     * <p>Matching is case-insensitive. The returned list preserves the order of tasks in the task list.</p>
+     *
+     * @param keyword Keyword to search for.
+     * @return List of matching tasks.
+     */
+    public ArrayList<Task> findByKeyword(String keyword) {
+        String keywordInLowerCase = keyword.toLowerCase();
+        ArrayList<Task> matches = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.description.toLowerCase().contains(keywordInLowerCase)) {
+                matches.add(task);
+            }
+        }
+
+        return matches;
+    }
+
+    /**
      * Saves the current tasks to disk if storage is configured.
      */
     public void save() {

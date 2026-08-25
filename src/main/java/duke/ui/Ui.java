@@ -78,4 +78,20 @@ public class Ui {
         }
         showLine();
     }
+
+    public void showMatchingTasks(ArrayList<Task> tasks) {
+        showLine();
+
+        if (tasks.isEmpty()) {
+            System.out.println("No matching tasks found.");
+            showLine();
+            return;
+        }
+
+        System.out.println("Here are the matching tasks in your list:");
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println((i + 1) + ". " + tasks.get(i));
+        }
+        showLine();
+    }
 }
