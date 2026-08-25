@@ -1,15 +1,11 @@
-import java.util.ArrayList;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Duke {
     private static ArrayList<Task> userList = new ArrayList<>();
-    private static final Path DATA_FILE = Path.of("data", "duke.txt");
+    private static final Storage storage = new Storage("data/duke.txt");
     private static final Ui ui = new Ui();
 
     public enum Command {
@@ -25,13 +21,13 @@ public class Duke {
     }
 
     public static void main(String[] args) {
-        loadTasks();
+        userList = storage.load();
         Scanner scanner = new Scanner(System.in);
         ui.showWelcome();
 
         while (true) {
             if (!scanner.hasNextLine()) {
-                saveTasks();
+                storage.save(userList);
                 scanner.close();
                 return;
             }
@@ -49,7 +45,7 @@ public class Duke {
             try {
                 switch (command) {
                     case BYE:
-                        saveTasks();
+                        storage.save(userList);
                         ui.showGoodbye();
                         scanner.close();
                         return;
@@ -105,7 +101,7 @@ public class Duke {
         } else {
             userList.get(task).markUndone();
         }
-        saveTasks();
+        storage.save(userList);
         ui.showMarkedTask(task + 1, isDone);
     }
 
@@ -117,7 +113,7 @@ public class Duke {
         }
 
         userList.add(new ToDo(description));
-        saveTasks();
+        storage.save(userList);
         ui.showTaskAdded(userList.getLast(), userList.size());
     }
 
@@ -134,7 +130,7 @@ public class Duke {
         try {
             LocalDate deadlineDate = LocalDate.parse(task[1].trim());
             userList.add(new Deadline(task[0].trim(), deadlineDate));
-            saveTasks();
+            storage.save(userList);
             ui.showTaskAdded(userList.getLast(), userList.size());
         } catch (DateTimeParseException e) {
             ui.showError("Please provide a valid deadline in the format YYYY-MM-DD.");
@@ -165,7 +161,7 @@ public class Duke {
             LocalDate end = LocalDate.parse(times[1].trim());
 
             userList.add(new Event(task[0].trim(), start, end));
-            saveTasks();
+            storage.save(userList);
             ui.showTaskAdded(userList.getLast(), userList.size());
         } catch (DateTimeParseException e) {
             ui.showError("Please provide valid start and end dates in the format YYYY-MM-DD.");
@@ -185,7 +181,7 @@ public class Duke {
             }
 
             Task removedTask = userList.remove(taskIndex);
-            saveTasks();
+            storage.save(userList);
 
             ui.showTaskRemoved(removedTask, userList.size());
 
@@ -194,68 +190,4 @@ public class Duke {
         }
     }
 
-    private static void saveTasks() {
-        try {
-            Files.createDirectories(DATA_FILE.getParent());
-            ArrayList<String> lines = new ArrayList<>();
-            for (Task task : userList) {
-                lines.add(task.toDataString());
-            }
-            Files.write(DATA_FILE, lines);
-        } catch (IOException e) {
-            ui.showError("Could not save tasks to disk.");
-        }
-    }
-
-    private static void loadTasks() {
-        if (!Files.exists(DATA_FILE)) {
-            return;
-        }
-
-        try {
-            List<String> lines = Files.readAllLines(DATA_FILE);
-            for (String line : lines) {
-                if (line.isBlank()) {
-                    continue;
-                }
-                String[] parts = line.split("\\|", -1);
-                if (parts.length < 3) {
-                    continue;
-                }
-
-                String type = parts[0].trim();
-                boolean isDone = parts[1].trim().equals("1");
-                String description = parts[2].trim();
-
-                Task task = switch (type) {
-                    case "T" -> new ToDo(description);
-                    case "D" -> {
-                        if (parts.length < 4) {
-                            yield null;
-                        }
-                        yield new Deadline(description, LocalDate.parse(parts[3].trim()));
-                    }
-                    case "E" -> {
-                        if (parts.length < 5) {
-                            yield null;
-                        }
-                        yield new Event(
-                                description,
-                                LocalDate.parse(parts[3].trim()),
-                                LocalDate.parse(parts[4].trim()));
-                    }
-                    default -> null;
-                };
-
-                if (task != null) {
-                    if (isDone) {
-                        task.markAsDone();
-                    }
-                    userList.add(task);
-                }
-            }
-        } catch (IOException e) {
-            ui.showError("Could not load tasks from disk.");
-        }
-    }
 }
