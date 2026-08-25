@@ -33,3 +33,13 @@ Ensure that Java 25 is used when running the application or build tasks. On macO
 Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
+
+## Coding standard
+
+Follow the SE-EDU Java coding standard (basic + intermediate) for all Java code in this project.
+Use the project skill `$seedu-java-coding-standard` at `_codex_home/skills/seedu-java-coding-standard/SKILL.md`.
+
+## Git conventions
+
+Follow the SE-EDU Git conventions for all future commits in this project (commit message subject/body and branch naming).
+Use the project skill `$seedu-git-standard` at `_codex_home/skills/seedu-git-standard/SKILL.md`.
