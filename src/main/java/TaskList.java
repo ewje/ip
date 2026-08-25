@@ -27,6 +27,18 @@ public class TaskList {
         tasks.add(task);
     }
 
+    public void addTodo(String description) {
+        tasks.add(new ToDo(description));
+    }
+
+    public void addDeadline(String description, java.time.LocalDate deadline) {
+        tasks.add(new Deadline(description, deadline));
+    }
+
+    public void addEvent(String description, java.time.LocalDate start, java.time.LocalDate end) {
+        tasks.add(new Event(description, start, end));
+    }
+
     public Task remove(int index) {
         return tasks.remove(index);
     }
@@ -36,6 +48,12 @@ public class TaskList {
             tasks.get(index).markAsDone();
         } else {
             tasks.get(index).markUndone();
+        }
+    }
+
+    public void validateIndex(int index) {
+        if (index < 0 || index >= tasks.size()) {
+            throw new GaryException("I can't find a task with that number!");
         }
     }
 

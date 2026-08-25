@@ -78,10 +78,7 @@ public class Duke {
             throw new GaryException("Please provide a valid number.");
         }
 
-        if (task < 0 || task >= tasks.size()) {
-            throw new GaryException("I can't find a task with that number!");
-        }
-
+        tasks.validateIndex(task);
         tasks.mark(task, isDone);
         storage.save(tasks.asList());
         ui.showMarkedTask(task + 1, isDone);
@@ -94,7 +91,7 @@ public class Duke {
             return;
         }
 
-        tasks.add(new ToDo(description));
+        tasks.addTodo(description);
         storage.save(tasks.asList());
         ui.showTaskAdded(tasks.getLast(), tasks.size());
     }
@@ -111,7 +108,7 @@ public class Duke {
 
         try {
             LocalDate deadlineDate = LocalDate.parse(task[1].trim());
-            tasks.add(new Deadline(task[0].trim(), deadlineDate));
+            tasks.addDeadline(task[0].trim(), deadlineDate);
             storage.save(tasks.asList());
             ui.showTaskAdded(tasks.getLast(), tasks.size());
         } catch (DateTimeParseException e) {
@@ -142,7 +139,7 @@ public class Duke {
             LocalDate start = LocalDate.parse(times[0].trim());
             LocalDate end = LocalDate.parse(times[1].trim());
 
-            tasks.add(new Event(task[0].trim(), start, end));
+            tasks.addEvent(task[0].trim(), start, end);
             storage.save(tasks.asList());
             ui.showTaskAdded(tasks.getLast(), tasks.size());
         } catch (DateTimeParseException e) {
@@ -158,9 +155,7 @@ public class Duke {
         try {
             int taskIndex = Integer.parseInt(argument.trim()) - 1;
 
-            if (taskIndex < 0 || taskIndex >= tasks.size()) {
-                throw new GaryException("I can't find a task with that number!");
-            }
+            tasks.validateIndex(taskIndex);
 
             Task removedTask = tasks.remove(taskIndex);
             storage.save(tasks.asList());
