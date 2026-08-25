@@ -2,7 +2,27 @@ package duke.parser;
 
 import duke.command.*;
 
+/**
+ * Parses user input lines into {@link duke.command.Command} objects.
+ *
+ * <p>This class is responsible for:
+ * <ul>
+ *   <li>Identifying the command keyword (the first token).</li>
+ *   <li>Extracting the argument string (the remainder of the line).</li>
+ *   <li>Constructing the corresponding {@code Command} object.</li>
+ * </ul>
+ *
+ * <p>Validation of argument correctness (e.g., date formats, missing fields) is delegated to
+ * the individual {@code Command} implementations.</p>
+ */
 public class Parser {
+
+    /**
+     * Parses a full user input line and returns a {@link Command} representing that input.
+     *
+     * @param userInput Full user input line.
+     * @return A {@code Command} instance; returns {@link UnknownCommand} if the command keyword is not recognised.
+     */
     public Command parse(String userInput) {
         String[] userSplit = userInput.trim().split(" ", 2);
         String commandWord = userSplit[0].toUpperCase();
@@ -21,6 +41,14 @@ public class Parser {
         };
     }
 
+    /**
+     * Parses the arguments for a {@code deadline} command.
+     *
+     * <p>Expected format: {@code <description> /by <YYYY-MM-DD>}</p>
+     *
+     * @param arguments The raw argument string after the command keyword.
+     * @return A {@link DeadlineCommand} carrying the extracted description and due date strings.
+     */
     private Command parseDeadline(String arguments) {
         String[] parts = arguments.split(" /by ", 2);
         String description = parts.length > 0 ? parts[0] : "";
@@ -28,6 +56,14 @@ public class Parser {
         return new DeadlineCommand(description, dueDate);
     }
 
+    /**
+     * Parses the arguments for an {@code event} command.
+     *
+     * <p>Expected format: {@code <description> /from <YYYY-MM-DD> /to <YYYY-MM-DD>}</p>
+     *
+     * @param arguments The raw argument string after the command keyword.
+     * @return An {@link EventCommand} carrying the extracted description, start date string, and end date string.
+     */
     private Command parseEvent(String arguments) {
         String[] fromParts = arguments.split(" /from ", 2);
         String description = fromParts.length > 0 ? fromParts[0] : "";

@@ -46,7 +46,7 @@ public class Duke {
             } catch (GaryException e) {
                 ui.showError(e.getMessage());
             } finally {
-                ui.showLine();
+                //ui.showLine();
             }
         }
         scanner.close();
