@@ -1,3 +1,10 @@
+package duke.command;
+
+import duke.exception.GaryException;
+import duke.storage.Storage;
+import duke.task.TaskList;
+import duke.ui.Ui;
+
 public class MarkCommand extends Command {
     private final String argument;
     private final boolean isDone;

@@ -1,4 +1,8 @@
+package duke.ui;
+
 import java.util.ArrayList;
+
+import duke.task.Task;
 
 public class Ui {
     private static final String LINE = "____________________________________________________________";

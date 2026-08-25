@@ -1,4 +1,13 @@
+package duke;
+
 import java.util.Scanner;
+
+import duke.command.Command;
+import duke.exception.GaryException;
+import duke.parser.Parser;
+import duke.storage.Storage;
+import duke.task.TaskList;
+import duke.ui.Ui;
 
 public class Duke {
     private final TaskList tasks;

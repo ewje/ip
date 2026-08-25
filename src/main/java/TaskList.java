@@ -1,4 +1,9 @@
+package duke.task;
+
 import java.util.ArrayList;
+
+import duke.exception.GaryException;
+import duke.storage.Storage;
 
 public class TaskList {
     private final ArrayList<Task> tasks;

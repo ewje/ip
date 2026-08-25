@@ -1,5 +1,11 @@
+package duke.command;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+
+import duke.storage.Storage;
+import duke.task.TaskList;
+import duke.ui.Ui;
 
 public class EventCommand extends Command {
     private final String description;
