@@ -37,7 +37,9 @@ test {
 }
 
 application {
-    mainClass = 'seedu.duke.Duke'
+    // Entry point for the app (in the default package).
+    // This class delegates to duke.Duke, which contains the main app logic.
+    mainClass = 'Duke'
 }
 
 jar {
