@@ -12,3 +12,8 @@ After every code change, update/add JUnit tests as needed to keep meeting this ~
 
 Follow the SE-EDU Java coding standard (basic + intermediate) for all Java code changes in this repository.
 Use the project skill `$seedu-java-coding-standard` at `_codex_home/skills/seedu-java-coding-standard/SKILL.md`.
+
+## Git conventions
+
+Follow the SE-EDU Git conventions for all future commits in this repository.
+Use the project skill `$seedu-git-standard` at `_codex_home/skills/seedu-git-standard/SKILL.md`.
