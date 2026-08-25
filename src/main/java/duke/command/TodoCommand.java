@@ -4,13 +4,29 @@ import duke.storage.Storage;
 import duke.task.TaskList;
 import duke.ui.Ui;
 
+/**
+ * Adds a todo task.
+ */
 public class TodoCommand extends Command {
+    /** Raw description string provided by the user. */
     private final String description;
 
+    /**
+     * Creates a todo command with the given description.
+     *
+     * @param description Raw description string (may include surrounding whitespace).
+     */
     public TodoCommand(String description) {
         this.description = description;
     }
 
+    /**
+     * Adds a todo task to the task list if the description is non-empty.
+     *
+     * @param tasks Task list to add into.
+     * @param ui UI used to show success/error messages.
+     * @param storage Unused (persistence is handled through {@link TaskList}).
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         String cleanedDescription = description.trim();
