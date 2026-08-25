@@ -7,3 +7,8 @@ After each code update, ensure `test/ui-test-plan.md` is updated if needed, then
 Aim for JUnit tests to cover the top ~50% highest-value methods (prioritise complex, core, or critical business logic over simple getters/formatting).
 
 After every code change, update/add JUnit tests as needed to keep meeting this ~50% target, and run the JUnit test suite to verify it still passes.
+
+## Java coding standard
+
+Follow the SE-EDU Java coding standard (basic + intermediate) for all Java code changes in this repository.
+Use the project skill `$seedu-java-coding-standard` at `_codex_home/skills/seedu-java-coding-standard/SKILL.md`.
