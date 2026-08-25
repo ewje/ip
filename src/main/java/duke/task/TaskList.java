@@ -77,6 +77,19 @@ public class TaskList {
         return tasks;
     }
 
+    public ArrayList<Task> findByKeyword(String keyword) {
+        String keywordInLowerCase = keyword.toLowerCase();
+        ArrayList<Task> matches = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.description.toLowerCase().contains(keywordInLowerCase)) {
+                matches.add(task);
+            }
+        }
+
+        return matches;
+    }
+
     public void save() {
         if (storage != null) {
             storage.save(tasks);

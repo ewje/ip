@@ -1,6 +1,15 @@
 package duke.parser;
 
-import duke.command.*;
+import duke.command.ByeCommand;
+import duke.command.Command;
+import duke.command.DeadlineCommand;
+import duke.command.DeleteCommand;
+import duke.command.EventCommand;
+import duke.command.FindCommand;
+import duke.command.ListCommand;
+import duke.command.MarkCommand;
+import duke.command.TodoCommand;
+import duke.command.UnknownCommand;
 
 public class Parser {
     public Command parse(String userInput) {
@@ -17,6 +26,7 @@ public class Parser {
             case "DEADLINE" -> parseDeadline(arguments);
             case "EVENT" -> parseEvent(arguments);
             case "DELETE" -> new DeleteCommand(arguments);
+            case "FIND" -> new FindCommand(arguments);
             default -> new UnknownCommand();
         };
     }

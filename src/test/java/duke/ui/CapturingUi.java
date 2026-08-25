@@ -24,6 +24,7 @@ public class CapturingUi extends Ui {
     public Boolean lastMarkedIsDone;
 
     public ArrayList<Task> lastShownTaskList;
+    public ArrayList<Task> lastShownMatchingTasks;
 
     @Override
     public void showError(String message) {
@@ -64,6 +65,11 @@ public class CapturingUi extends Ui {
     }
 
     @Override
+    public void showMatchingTasks(ArrayList<Task> tasks) {
+        lastShownMatchingTasks = tasks;
+    }
+
+    @Override
     public void showLine() {
         // No-op: keep test output clean.
     }
@@ -78,4 +84,3 @@ public class CapturingUi extends Ui {
         // No-op.
     }
 }
-

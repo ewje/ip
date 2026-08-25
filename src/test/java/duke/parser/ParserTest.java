@@ -12,6 +12,7 @@ import duke.command.Command;
 import duke.command.DeadlineCommand;
 import duke.command.DeleteCommand;
 import duke.command.EventCommand;
+import duke.command.FindCommand;
 import duke.command.ListCommand;
 import duke.command.MarkCommand;
 import duke.command.TodoCommand;
@@ -69,6 +70,12 @@ public class ParserTest {
     public void parse_delete_returnsDeleteCommand() {
         Command command = parser.parse("delete 1");
         assertInstanceOf(DeleteCommand.class, command);
+    }
+
+    @Test
+    public void parse_find_returnsFindCommand() {
+        Command command = parser.parse("find book");
+        assertInstanceOf(FindCommand.class, command);
     }
 
     @Test
