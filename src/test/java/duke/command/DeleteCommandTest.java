@@ -48,7 +48,7 @@ public class DeleteCommandTest {
     }
 
     @Test
-    public void execute_validIndex_removesTask_andShowsUi() {
+    public void execute_validIndex_removesTask() {
         TaskList tasks = new TaskList();
         tasks.addTodo("read book");
         tasks.addTodo("write notes");
@@ -59,9 +59,8 @@ public class DeleteCommandTest {
         assertEquals(1, tasks.size());
         assertEquals("T | 0 | write notes", tasks.get(0).toDataString());
 
-        assertEquals("T | 0 | read book", ui.lastRemovedTask.toDataString());
-        assertEquals(1, ui.lastRemovedTaskCount);
-        assertNull(ui.lastErrorMessage);
+        assertEquals("T | 0 | read book", ui.getLastRemovedTask().toDataString());
+        assertEquals(1, ui.getLastRemovedTaskCount());
+        assertNull(ui.getLastErrorMessage());
     }
 }
-

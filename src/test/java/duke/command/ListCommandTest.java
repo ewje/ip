@@ -19,9 +19,8 @@ public class ListCommandTest {
 
         new ListCommand().execute(tasks, ui, null);
 
-        assertEquals(2, ui.lastShownTaskList.size());
-        assertEquals("T | 0 | read book", ui.lastShownTaskList.get(0).toDataString());
-        assertEquals("T | 0 | write notes", ui.lastShownTaskList.get(1).toDataString());
+        assertEquals(2, ui.getLastShownTaskList().size());
+        assertEquals("T | 0 | read book", ui.getLastShownTaskList().get(0).toDataString());
+        assertEquals("T | 0 | write notes", ui.getLastShownTaskList().get(1).toDataString());
     }
 }
-

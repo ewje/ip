@@ -8,7 +8,7 @@ import java.time.LocalDate;
 public class Deadline extends Task {
     /** Due date of the deadline. */
     private LocalDate deadline;
-    
+
     /**
      * Creates a deadline task.
      *

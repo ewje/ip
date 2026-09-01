@@ -17,27 +17,27 @@ public class EventCommandTest {
 
         new EventCommand("project meeting", "2026-08-25", "2026-08-26").execute(tasks, ui, null);
 
-        assertNull(ui.lastErrorMessage);
+        assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
         assertEquals("E | 0 | project meeting | 2026-08-25 | 2026-08-26", tasks.getLast().toDataString());
-        assertEquals(tasks.getLast(), ui.lastAddedTask);
-        assertEquals(1, ui.lastAddedTaskCount);
+        assertEquals(tasks.getLast(), ui.getLastAddedTask());
+        assertEquals(1, ui.getLastAddedTaskCount());
     }
 
     @Test
-    public void execute_validEvent_withWhitespace_trimsAndAddsTask() {
+    public void execute_validEventWithWhitespace_addsTask() {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
         new EventCommand("  project meeting  ", "  2026-08-25 ", " 2026-08-26  ").execute(tasks, ui, null);
 
-        assertNull(ui.lastErrorMessage);
+        assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
         assertEquals("E | 0 | project meeting | 2026-08-25 | 2026-08-26", tasks.getLast().toDataString());
     }
 
     @Test
-    public void execute_emptyDescription_showsError_noTaskAdded() {
+    public void execute_emptyDescription_showsError() {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
@@ -47,12 +47,12 @@ public class EventCommandTest {
         assertEquals("""
                 The Event description and dates cannot be empty!
                 Use ' /from ' and ' /to ' to indicate start and end dates!
-                """, ui.lastErrorMessage);
-        assertNull(ui.lastAddedTask);
+                """, ui.getLastErrorMessage());
+        assertNull(ui.getLastAddedTask());
     }
 
     @Test
-    public void execute_emptyDates_showsError_noTaskAdded() {
+    public void execute_emptyDates_showsError() {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
@@ -62,29 +62,28 @@ public class EventCommandTest {
         assertEquals("""
                 The Event description and dates cannot be empty!
                 Use ' /from ' and ' /to ' to indicate start and end dates!
-                """, ui.lastErrorMessage);
+                """, ui.getLastErrorMessage());
     }
 
     @Test
-    public void execute_invalidFormat_showsError_noTaskAdded() {
+    public void execute_invalidFormat_showsError() {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
         new EventCommand("project meeting", "2026/08/25", "2026-08-26").execute(tasks, ui, null);
 
         assertEquals(0, tasks.size());
-        assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.lastErrorMessage);
+        assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.getLastErrorMessage());
     }
 
     @Test
-    public void execute_nonPaddedDate_showsError_noTaskAdded() {
+    public void execute_nonPaddedDate_showsError() {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
         new EventCommand("project meeting", "2026-8-5", "2026-08-26").execute(tasks, ui, null);
 
         assertEquals(0, tasks.size());
-        assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.lastErrorMessage);
+        assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.getLastErrorMessage());
     }
 }
-

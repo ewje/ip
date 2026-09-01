@@ -1,8 +1,8 @@
 package duke.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
@@ -106,8 +106,8 @@ public class ParserTest {
         command.execute(tasks, ui, null);
 
         assertEquals(0, tasks.size());
-        assertNotNull(ui.lastErrorMessage);
-        assertNull(ui.lastAddedTask);
+        assertNotNull(ui.getLastErrorMessage());
+        assertNull(ui.getLastAddedTask());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class ParserTest {
         command.execute(tasks, ui, null);
 
         assertEquals(0, tasks.size());
-        assertNotNull(ui.lastErrorMessage);
-        assertNull(ui.lastAddedTask);
+        assertNotNull(ui.getLastErrorMessage());
+        assertNull(ui.getLastAddedTask());
     }
 }

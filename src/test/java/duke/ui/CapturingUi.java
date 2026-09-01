@@ -9,22 +9,66 @@ import duke.task.Task;
  * Keeps test output clean by not printing to stdout.
  */
 public class CapturingUi extends Ui {
-    public String lastErrorMessage;
-    public String lastMessage;
+    private String lastErrorMessage;
+    private String lastMessage;
 
-    public boolean goodbyeShown;
+    private boolean goodbyeShown;
 
-    public Task lastAddedTask;
-    public Integer lastAddedTaskCount;
+    private Task lastAddedTask;
+    private Integer lastAddedTaskCount;
 
-    public Task lastRemovedTask;
-    public Integer lastRemovedTaskCount;
+    private Task lastRemovedTask;
+    private Integer lastRemovedTaskCount;
 
-    public Integer lastMarkedTaskNumber;
-    public Boolean lastMarkedIsDone;
+    private Integer lastMarkedTaskNumber;
+    private Boolean lastMarkedIsDone;
 
-    public ArrayList<Task> lastShownTaskList;
-    public ArrayList<Task> lastShownMatchingTasks;
+    private ArrayList<Task> lastShownTaskList;
+    private ArrayList<Task> lastShownMatchingTasks;
+
+    public String getLastErrorMessage() {
+        return lastErrorMessage;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public boolean isGoodbyeShown() {
+        return goodbyeShown;
+    }
+
+    public Task getLastAddedTask() {
+        return lastAddedTask;
+    }
+
+    public Integer getLastAddedTaskCount() {
+        return lastAddedTaskCount;
+    }
+
+    public Task getLastRemovedTask() {
+        return lastRemovedTask;
+    }
+
+    public Integer getLastRemovedTaskCount() {
+        return lastRemovedTaskCount;
+    }
+
+    public Integer getLastMarkedTaskNumber() {
+        return lastMarkedTaskNumber;
+    }
+
+    public Boolean getLastMarkedIsDone() {
+        return lastMarkedIsDone;
+    }
+
+    public ArrayList<Task> getLastShownTaskList() {
+        return lastShownTaskList;
+    }
+
+    public ArrayList<Task> getLastShownMatchingTasks() {
+        return lastShownMatchingTasks;
+    }
 
     @Override
     public void showError(String message) {

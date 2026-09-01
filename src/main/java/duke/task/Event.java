@@ -32,7 +32,7 @@ public class Event extends Task {
     @Override
     public String toString() {
         return "[E] " + super.toString() + " (from: " + this.start + " to: " + this.end + ")";
-     }
+    }
 
     /**
      * Returns the storage format for an event task.

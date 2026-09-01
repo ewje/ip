@@ -55,8 +55,8 @@ public class MarkCommandTest {
         new MarkCommand("1", true).execute(tasks, ui, null);
 
         assertEquals("T | 1 | read book", tasks.get(0).toDataString());
-        assertEquals(1, ui.lastMarkedTaskNumber);
-        assertEquals(true, ui.lastMarkedIsDone);
+        assertEquals(1, ui.getLastMarkedTaskNumber());
+        assertEquals(true, ui.getLastMarkedIsDone());
     }
 
     @Test
@@ -69,8 +69,7 @@ public class MarkCommandTest {
         new MarkCommand("1", false).execute(tasks, ui, null);
 
         assertEquals("T | 0 | read book", tasks.get(0).toDataString());
-        assertEquals(1, ui.lastMarkedTaskNumber);
-        assertEquals(false, ui.lastMarkedIsDone);
+        assertEquals(1, ui.getLastMarkedTaskNumber());
+        assertEquals(false, ui.getLastMarkedIsDone());
     }
 }
-

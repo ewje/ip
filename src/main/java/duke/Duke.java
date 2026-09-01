@@ -9,11 +9,21 @@ import duke.storage.Storage;
 import duke.task.TaskList;
 import duke.ui.Ui;
 
+/**
+ * Main entry point for the Duke task-tracking application.
+ *
+ * <p>Reads user commands from standard input, executes them, and saves tasks to disk.</p>
+ */
 public class Duke {
     private final TaskList tasks;
     private final Ui ui;
     private final Parser parser;
 
+    /**
+     * Creates a Duke application using the given file path for storage.
+     *
+     * @param filePath File path to load/save tasks.
+     */
     public Duke(String filePath) {
         this.ui = new Ui();
         Storage storage = new Storage(filePath);
@@ -22,6 +32,9 @@ public class Duke {
         this.tasks.setStorage(storage);
     }
 
+    /**
+     * Starts the main input loop for the application.
+     */
     public void run() {
         Scanner scanner = new Scanner(System.in);
         ui.showWelcome();
@@ -45,8 +58,6 @@ public class Duke {
                 isExit = command.isExit();
             } catch (GaryException e) {
                 ui.showError(e.getMessage());
-            } finally {
-                //ui.showLine();
             }
         }
         scanner.close();

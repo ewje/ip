@@ -4,9 +4,15 @@ import java.util.ArrayList;
 
 import duke.task.Task;
 
+/**
+ * Handles all user-visible output for the Duke application.
+ */
 public class Ui {
     private static final String LINE = "____________________________________________________________";
 
+    /**
+     * Shows the welcome banner and greeting message.
+     */
     public void showWelcome() {
         String banner = """
                  ==================================================================\s
@@ -26,28 +32,53 @@ public class Ui {
         System.out.println(banner + greeting);
     }
 
+    /**
+     * Shows the goodbye message.
+     */
     public void showGoodbye() {
         System.out.println("Bye! Hope to see you again soon!\n");
     }
 
+    /**
+     * Shows a horizontal separator line.
+     */
     public void showLine() {
         System.out.println(LINE);
     }
 
+    /**
+     * Shows an error message indicating that the user did not enter a command.
+     */
     public void showEmptyInputError() {
         showError("Please enter a command.");
     }
 
+    /**
+     * Shows a generic informational message.
+     *
+     * @param message Message to display.
+     */
     public void showMessage(String message) {
         System.out.println(message);
     }
 
+    /**
+     * Shows an error message with separator lines around it.
+     *
+     * @param message Error message to display.
+     */
     public void showError(String message) {
         showLine();
         System.out.println(message);
         showLine();
     }
 
+    /**
+     * Shows a confirmation message after a task is added.
+     *
+     * @param task The task that was added.
+     * @param taskCount Total number of tasks after adding.
+     */
     public void showTaskAdded(Task task, int taskCount) {
         showLine();
         System.out.println("Got it! Here's the task you added:\n"
@@ -56,6 +87,12 @@ public class Ui {
         showLine();
     }
 
+    /**
+     * Shows a confirmation message after a task is removed.
+     *
+     * @param task The task that was removed.
+     * @param taskCount Total number of tasks after removal.
+     */
     public void showTaskRemoved(Task task, int taskCount) {
         showLine();
         System.out.println("Noted. This task has been removed:");
@@ -64,12 +101,23 @@ public class Ui {
         showLine();
     }
 
+    /**
+     * Shows a message after a task is marked or unmarked.
+     *
+     * @param taskNumber 1-based task number.
+     * @param isDone Whether the task is now marked as done.
+     */
     public void showMarkedTask(int taskNumber, boolean isDone) {
         showLine();
         System.out.println("Gary marked task " + taskNumber + (isDone ? " as done!" : " as undone!"));
         showLine();
     }
 
+    /**
+     * Shows all tasks in the task list.
+     *
+     * @param tasks Tasks to display.
+     */
     public void showTaskList(ArrayList<Task> tasks) {
         showLine();
         System.out.println("These are the tasks you have in your list!");
@@ -79,6 +127,11 @@ public class Ui {
         showLine();
     }
 
+    /**
+     * Shows tasks matching a keyword search.
+     *
+     * @param tasks Matching tasks to display.
+     */
     public void showMatchingTasks(ArrayList<Task> tasks) {
         showLine();
 

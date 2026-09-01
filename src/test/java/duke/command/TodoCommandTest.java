@@ -17,11 +17,11 @@ public class TodoCommandTest {
 
         new TodoCommand("read book").execute(tasks, ui, null);
 
-        assertNull(ui.lastErrorMessage);
+        assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
         assertEquals("T | 0 | read book", tasks.getLast().toDataString());
-        assertEquals(tasks.getLast(), ui.lastAddedTask);
-        assertEquals(1, ui.lastAddedTaskCount);
+        assertEquals(tasks.getLast(), ui.getLastAddedTask());
+        assertEquals(1, ui.getLastAddedTaskCount());
     }
 
     @Test
@@ -31,22 +31,21 @@ public class TodoCommandTest {
 
         new TodoCommand("  read book  ").execute(tasks, ui, null);
 
-        assertNull(ui.lastErrorMessage);
+        assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
         assertEquals("T | 0 | read book", tasks.getLast().toDataString());
     }
 
     @Test
-    public void execute_emptyDescription_showsError_noTaskAdded() {
+    public void execute_emptyDescription_showsError() {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
         new TodoCommand("   ").execute(tasks, ui, null);
 
         assertEquals(0, tasks.size());
-        assertEquals("The Todo description cannot be empty!", ui.lastErrorMessage);
-        assertNull(ui.lastAddedTask);
-        assertNull(ui.lastAddedTaskCount);
+        assertEquals("The Todo description cannot be empty!", ui.getLastErrorMessage());
+        assertNull(ui.getLastAddedTask());
+        assertNull(ui.getLastAddedTaskCount());
     }
 }
-

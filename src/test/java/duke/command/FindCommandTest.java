@@ -25,10 +25,10 @@ public class FindCommandTest {
 
         new FindCommand("book").execute(tasks, ui, null);
 
-        assertNull(ui.lastErrorMessage);
-        assertEquals(2, ui.lastShownMatchingTasks.size());
-        assertEquals("[T] [X] read book", ui.lastShownMatchingTasks.get(0).toString());
-        assertEquals("[D] [X] return book (by: 2026-06-06)", ui.lastShownMatchingTasks.get(1).toString());
+        assertNull(ui.getLastErrorMessage());
+        assertEquals(2, ui.getLastShownMatchingTasks().size());
+        assertEquals("[T] [X] read book", ui.getLastShownMatchingTasks().get(0).toString());
+        assertEquals("[D] [X] return book (by: 2026-06-06)", ui.getLastShownMatchingTasks().get(1).toString());
     }
 
     @Test
@@ -40,8 +40,8 @@ public class FindCommandTest {
 
         new FindCommand("BOOK").execute(tasks, ui, null);
 
-        assertEquals(1, ui.lastShownMatchingTasks.size());
-        assertEquals("[T] [ ] read book", ui.lastShownMatchingTasks.get(0).toString());
+        assertEquals(1, ui.getLastShownMatchingTasks().size());
+        assertEquals("[T] [ ] read book", ui.getLastShownMatchingTasks().get(0).toString());
     }
 
     @Test
@@ -53,12 +53,12 @@ public class FindCommandTest {
 
         new FindCommand("xyz").execute(tasks, ui, null);
 
-        assertNull(ui.lastErrorMessage);
-        assertEquals(0, ui.lastShownMatchingTasks.size());
+        assertNull(ui.getLastErrorMessage());
+        assertEquals(0, ui.getLastShownMatchingTasks().size());
     }
 
     @Test
-    public void execute_emptyKeyword_showsError_noSearchDone() {
+    public void execute_emptyKeyword_showsError() {
         TaskList tasks = new TaskList();
         tasks.addTodo("read book");
 
@@ -66,8 +66,7 @@ public class FindCommandTest {
 
         new FindCommand("   ").execute(tasks, ui, null);
 
-        assertEquals("The find keyword cannot be empty!", ui.lastErrorMessage);
-        assertNull(ui.lastShownMatchingTasks);
+        assertEquals("The find keyword cannot be empty!", ui.getLastErrorMessage());
+        assertNull(ui.getLastShownMatchingTasks());
     }
 }
-
