@@ -30,6 +30,12 @@ public class GuiUi extends Ui {
         output.append(line);
     }
 
+    private void appendLines(String... lines) {
+        for (String line : lines) {
+            appendLine(line);
+        }
+    }
+
     @Override
     public void showError(String message) {
         appendLine(message);
@@ -47,16 +53,20 @@ public class GuiUi extends Ui {
 
     @Override
     public void showTaskAdded(Task task, int taskCount) {
-        appendLine("Got it! Here's the task you added:");
-        appendLine("  " + task);
-        appendLine("Now you have " + taskCount + " tasks in your list!");
+        appendLines(
+                "Got it! Here's the task you added:",
+                "  " + task,
+                "Now you have " + taskCount + " tasks in your list!"
+        );
     }
 
     @Override
     public void showTaskRemoved(Task task, int taskCount) {
-        appendLine("Noted. This task has been removed:");
-        appendLine("  " + task);
-        appendLine("Now you have " + taskCount + " tasks in the list.");
+        appendLines(
+                "Noted. This task has been removed:",
+                "  " + task,
+                "Now you have " + taskCount + " tasks in the list."
+        );
     }
 
     @Override
@@ -85,4 +95,3 @@ public class GuiUi extends Ui {
         }
     }
 }
-
