@@ -19,7 +19,7 @@ javafx {
     // Use a JavaFX version available on Maven Central.
     // (We use JDK 25 for the project; JavaFX can be on a different minor/major as long as it is compatible.)
     version = '24.0.2'
-    modules = ['javafx.controls']
+    modules = ['javafx.controls', 'javafx.fxml']
 }
 
 dependencies {
@@ -70,6 +70,8 @@ tasks.register('runGui', JavaExec) {
     description = 'Runs the JavaFX GUI (Hello World check).'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'duke.gui.GuiLauncher'
+    // Java 25 warns that JavaFX needs native access; enable it to keep the output clean.
+    jvmArgs '--enable-native-access=javafx.graphics'
 }
 
 checkstyle {

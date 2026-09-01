@@ -63,6 +63,35 @@ public class Duke {
         scanner.close();
     }
 
+    /**
+     * Processes one line of user input and returns Duke's response as a string.
+     *
+     * <p>This method exists to support the JavaFX GUI. The CLI path should continue to use {@link #run()}.</p>
+     *
+     * @param input User input string.
+     * @return Response to show to the user.
+     */
+    public String getResponse(String input) {
+        String trimmedInput = input == null ? "" : input.trim();
+        if (trimmedInput.isEmpty()) {
+            return "Please enter a command.";
+        }
+
+        duke.ui.GuiUi guiUi = new duke.ui.GuiUi();
+        try {
+            Command command = parser.parse(trimmedInput);
+            command.execute(tasks, guiUi, null);
+
+            if (command.isExit()) {
+                tasks.save();
+            }
+        } catch (GaryException e) {
+            guiUi.showError(e.getMessage());
+        }
+
+        return guiUi.consumeOutput();
+    }
+
     public static void main(String[] args) {
         new Duke("data/duke.txt").run();
     }
