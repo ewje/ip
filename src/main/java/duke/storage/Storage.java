@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import duke.exception.GaryException;
 import duke.task.Deadline;
@@ -47,25 +49,18 @@ public class Storage {
      * @throws GaryException If an I/O error occurs while reading the file.
      */
     public ArrayList<Task> load() {
-        ArrayList<Task> tasks = new ArrayList<>();
-
         if (!Files.exists(filePath)) {
-            return tasks;
+            return new ArrayList<>();
         }
 
         try {
-            List<String> lines = Files.readAllLines(filePath);
-            for (String line : lines) {
-                Task task = parseTask(line);
-                if (task != null) {
-                    tasks.add(task);
-                }
-            }
+            return Files.readAllLines(filePath).stream()
+                    .map(this::parseTask)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(ArrayList::new));
         } catch (IOException e) {
             throw new GaryException("Could not load tasks from disk.");
         }
-
-        return tasks;
     }
 
     /**
