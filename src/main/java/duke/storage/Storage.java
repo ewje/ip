@@ -79,10 +79,9 @@ public class Storage {
     public void save(ArrayList<Task> tasks) {
         try {
             Files.createDirectories(filePath.getParent());
-            ArrayList<String> lines = new ArrayList<>();
-            for (Task task : tasks) {
-                lines.add(task.toDataString());
-            }
+            List<String> lines = tasks.stream()
+                    .map(Task::toDataString)
+                    .toList();
             Files.write(filePath, lines);
         } catch (IOException e) {
             throw new GaryException("Could not save tasks to disk.");
