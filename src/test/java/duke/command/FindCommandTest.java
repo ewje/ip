@@ -23,7 +23,7 @@ public class FindCommandTest {
 
         CapturingUi ui = new CapturingUi();
 
-        new FindCommand("book").execute(tasks, ui, null);
+        new FindCommand("book").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(2, ui.getLastShownMatchingTasks().size());
@@ -38,7 +38,7 @@ public class FindCommandTest {
 
         CapturingUi ui = new CapturingUi();
 
-        new FindCommand("BOOK").execute(tasks, ui, null);
+        new FindCommand("BOOK").execute(tasks, ui);
 
         assertEquals(1, ui.getLastShownMatchingTasks().size());
         assertEquals("[T] [ ] read book", ui.getLastShownMatchingTasks().get(0).toString());
@@ -51,7 +51,7 @@ public class FindCommandTest {
 
         CapturingUi ui = new CapturingUi();
 
-        new FindCommand("xyz").execute(tasks, ui, null);
+        new FindCommand("xyz").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(0, ui.getLastShownMatchingTasks().size());
@@ -64,7 +64,7 @@ public class FindCommandTest {
 
         CapturingUi ui = new CapturingUi();
 
-        new FindCommand("   ").execute(tasks, ui, null);
+        new FindCommand("   ").execute(tasks, ui);
 
         assertEquals("The find keyword cannot be empty!", ui.getLastErrorMessage());
         assertNull(ui.getLastShownMatchingTasks());

@@ -103,7 +103,7 @@ public class ParserTest {
 
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
-        command.execute(tasks, ui, null);
+        command.execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertNotNull(ui.getLastErrorMessage());
@@ -117,7 +117,7 @@ public class ParserTest {
 
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
-        command.execute(tasks, ui, null);
+        command.execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertNotNull(ui.getLastErrorMessage());

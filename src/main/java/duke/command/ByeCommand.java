@@ -1,6 +1,5 @@
 package duke.command;
 
-import duke.storage.Storage;
 import duke.task.TaskList;
 import duke.ui.Ui;
 
@@ -16,10 +15,9 @@ public class ByeCommand extends Command {
      *
      * @param tasks The task list to save.
      * @param ui The UI used to show the goodbye message.
-     * @param storage Unused (persistence is handled through {@link TaskList}).
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public void execute(TaskList tasks, Ui ui) {
         tasks.save();
         ui.showGoodbye();
     }

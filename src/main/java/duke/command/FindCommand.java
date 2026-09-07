@@ -2,7 +2,6 @@ package duke.command;
 
 import java.util.ArrayList;
 
-import duke.storage.Storage;
 import duke.task.Task;
 import duke.task.TaskList;
 import duke.ui.Ui;
@@ -27,10 +26,9 @@ public class FindCommand extends Command {
      *
      * @param tasks Task list to search.
      * @param ui UI used to show results/errors.
-     * @param storage Unused.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public void execute(TaskList tasks, Ui ui) {
         String cleanedKeyword = keyword.trim();
         if (cleanedKeyword.isEmpty()) {
             ui.showError("The find keyword cannot be empty!");
@@ -41,4 +39,3 @@ public class FindCommand extends Command {
         ui.showMatchingTasks(matches);
     }
 }
-
