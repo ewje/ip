@@ -1,6 +1,7 @@
 package duke.ui;
 
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 import duke.task.Task;
 
@@ -121,9 +122,8 @@ public class Ui {
     public void showTaskList(ArrayList<Task> tasks) {
         showLine();
         System.out.println("These are the tasks you have in your list!");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + ". " + tasks.get(i));
-        }
+        IntStream.range(0, tasks.size())
+                .forEach(index -> System.out.println((index + 1) + ". " + tasks.get(index)));
         showLine();
     }
 
@@ -142,9 +142,8 @@ public class Ui {
         }
 
         System.out.println("Here are the matching tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + ". " + tasks.get(i));
-        }
+        IntStream.range(0, tasks.size())
+                .forEach(index -> System.out.println((index + 1) + ". " + tasks.get(index)));
         showLine();
     }
 }
