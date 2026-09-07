@@ -18,7 +18,7 @@ public class DeleteCommandTest {
         CapturingUi ui = new CapturingUi();
 
         GaryException exception = assertThrows(GaryException.class, () ->
-                new DeleteCommand("   ").execute(tasks, ui, null));
+                new DeleteCommand("   ").execute(tasks, ui));
 
         assertEquals("Please indicate which task number to delete!", exception.getMessage());
     }
@@ -30,7 +30,7 @@ public class DeleteCommandTest {
         CapturingUi ui = new CapturingUi();
 
         GaryException exception = assertThrows(GaryException.class, () ->
-                new DeleteCommand("abc").execute(tasks, ui, null));
+                new DeleteCommand("abc").execute(tasks, ui));
 
         assertEquals("Please provide a valid number.", exception.getMessage());
     }
@@ -42,7 +42,7 @@ public class DeleteCommandTest {
         CapturingUi ui = new CapturingUi();
 
         GaryException exception = assertThrows(GaryException.class, () ->
-                new DeleteCommand("2").execute(tasks, ui, null));
+                new DeleteCommand("2").execute(tasks, ui));
 
         assertEquals("I can't find a task with that number!", exception.getMessage());
     }
@@ -54,7 +54,7 @@ public class DeleteCommandTest {
         tasks.addTodo("write notes");
         CapturingUi ui = new CapturingUi();
 
-        new DeleteCommand("1").execute(tasks, ui, null);
+        new DeleteCommand("1").execute(tasks, ui);
 
         assertEquals(1, tasks.size());
         assertEquals("T | 0 | write notes", tasks.get(0).toDataString());

@@ -1,7 +1,6 @@
 package duke.command;
 
 import duke.exception.GaryException;
-import duke.storage.Storage;
 import duke.task.TaskList;
 import duke.ui.Ui;
 
@@ -32,11 +31,10 @@ public class MarkCommand extends Command {
      *
      * @param tasks Task list to update.
      * @param ui UI used to show the result.
-     * @param storage Unused.
      * @throws GaryException If the argument is blank, not a number, or out of range.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public void execute(TaskList tasks, Ui ui) {
         if (argument.isBlank()) {
             throw new GaryException("Please indicate which task number to update!");
         }

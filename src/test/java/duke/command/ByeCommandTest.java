@@ -33,7 +33,7 @@ public class ByeCommandTest {
 
         CapturingUi ui = new CapturingUi();
 
-        new ByeCommand().execute(tasks, ui, null);
+        new ByeCommand().execute(tasks, ui);
 
         assertTrue(ui.isGoodbyeShown());
         assertTrue(Files.exists(file));

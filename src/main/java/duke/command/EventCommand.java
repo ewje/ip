@@ -3,7 +3,6 @@ package duke.command;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
-import duke.storage.Storage;
 import duke.task.TaskList;
 import duke.ui.Ui;
 
@@ -38,10 +37,9 @@ public class EventCommand extends Command {
      *
      * @param tasks Task list to add into.
      * @param ui UI used to show success/error messages.
-     * @param storage Unused (persistence is handled through {@link TaskList}).
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public void execute(TaskList tasks, Ui ui) {
         if (description.trim().isEmpty() || start.trim().isEmpty() || end.trim().isEmpty()) {
             ui.showError("""
                     The Event description and dates cannot be empty!

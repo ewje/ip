@@ -17,7 +17,7 @@ public class MarkCommandTest {
         CapturingUi ui = new CapturingUi();
 
         GaryException exception = assertThrows(GaryException.class, () ->
-                new MarkCommand("   ", true).execute(tasks, ui, null));
+                new MarkCommand("   ", true).execute(tasks, ui));
 
         assertEquals("Please indicate which task number to update!", exception.getMessage());
     }
@@ -29,7 +29,7 @@ public class MarkCommandTest {
         CapturingUi ui = new CapturingUi();
 
         GaryException exception = assertThrows(GaryException.class, () ->
-                new MarkCommand("abc", true).execute(tasks, ui, null));
+                new MarkCommand("abc", true).execute(tasks, ui));
 
         assertEquals("Please provide a valid number.", exception.getMessage());
     }
@@ -41,7 +41,7 @@ public class MarkCommandTest {
         CapturingUi ui = new CapturingUi();
 
         GaryException exception = assertThrows(GaryException.class, () ->
-                new MarkCommand("2", true).execute(tasks, ui, null));
+                new MarkCommand("2", true).execute(tasks, ui));
 
         assertEquals("I can't find a task with that number!", exception.getMessage());
     }
@@ -52,7 +52,7 @@ public class MarkCommandTest {
         tasks.addTodo("read book");
         CapturingUi ui = new CapturingUi();
 
-        new MarkCommand("1", true).execute(tasks, ui, null);
+        new MarkCommand("1", true).execute(tasks, ui);
 
         assertEquals("T | 1 | read book", tasks.get(0).toDataString());
         assertEquals(1, ui.getLastMarkedTaskNumber());
@@ -66,7 +66,7 @@ public class MarkCommandTest {
         tasks.mark(0, true);
         CapturingUi ui = new CapturingUi();
 
-        new MarkCommand("1", false).execute(tasks, ui, null);
+        new MarkCommand("1", false).execute(tasks, ui);
 
         assertEquals("T | 0 | read book", tasks.get(0).toDataString());
         assertEquals(1, ui.getLastMarkedTaskNumber());

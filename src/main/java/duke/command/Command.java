@@ -1,6 +1,5 @@
 package duke.command;
 
-import duke.storage.Storage;
 import duke.task.TaskList;
 import duke.ui.Ui;
 
@@ -15,16 +14,12 @@ public abstract class Command {
     /**
      * Executes the command.
      *
-     * <p>Implementations may mutate the task list and/or display messages via the {@link Ui}. The
-     * {@code storage} parameter is provided for completeness, but most commands should interact with
-     * persistence through {@link TaskList} instead.</p>
+     * <p>Implementations may mutate the task list and/or display messages via the {@link Ui}.</p>
      *
      * @param tasks The task list to operate on.
      * @param ui The UI used to show messages/errors.
-     * @param storage Storage instance used for persistence (may be {@code null} and may be unused).
      */
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
-    }
+    public abstract void execute(TaskList tasks, Ui ui);
 
     /**
      * Indicates whether executing this command should cause the application to exit.

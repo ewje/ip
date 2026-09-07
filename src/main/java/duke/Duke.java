@@ -56,8 +56,10 @@ public class Duke {
                 }
 
                 Command command = parser.parse(fullCommand);
+
                 assert command != null : "Parser must return a command for non-blank input";
-                command.execute(tasks, ui, null);
+                command.execute(tasks, ui);
+
                 isExit = command.isExit();
             } catch (GaryException e) {
                 ui.showError(e.getMessage());
@@ -83,8 +85,9 @@ public class Duke {
         duke.ui.GuiUi guiUi = new duke.ui.GuiUi();
         try {
             Command command = parser.parse(trimmedInput);
+
             assert command != null : "Parser must return a command for non-blank input";
-            command.execute(tasks, guiUi, null);
+            command.execute(tasks, guiUi);
 
             if (command.isExit()) {
                 tasks.save();
