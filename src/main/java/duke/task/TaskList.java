@@ -28,6 +28,9 @@ public class TaskList {
      * @param tasks Existing tasks to use as the initial contents.
      */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "Initial task list must not be null";
+        assert tasks.stream().noneMatch(task -> task == null) : "Initial task list must not contain null tasks";
+
         this.tasks = tasks;
     }
 
@@ -37,6 +40,8 @@ public class TaskList {
      * @param storage Storage instance to use.
      */
     public void setStorage(Storage storage) {
+        assert storage != null : "Configured storage must not be null";
+
         this.storage = storage;
     }
 
@@ -65,6 +70,8 @@ public class TaskList {
      * @return Last task in the list.
      */
     public Task getLast() {
+        assert !tasks.isEmpty() : "Cannot get the last task from an empty list";
+
         return tasks.getLast();
     }
 
@@ -77,6 +84,8 @@ public class TaskList {
      * @param task Task to add.
      */
     public void add(Task task) {
+        assert task != null : "Task to add must not be null";
+
         tasks.add(task);
     }
 
@@ -86,6 +95,8 @@ public class TaskList {
      * @param description Description of the todo.
      */
     public void addTodo(String description) {
+        assert description != null && !description.isBlank() : "Todo description must be non-blank";
+
         tasks.add(new ToDo(description));
         save();
     }
@@ -97,6 +108,9 @@ public class TaskList {
      * @param deadline Due date.
      */
     public void addDeadline(String description, java.time.LocalDate deadline) {
+        assert description != null && !description.isBlank() : "Deadline description must be non-blank";
+        assert deadline != null : "Deadline date must not be null";
+
         tasks.add(new Deadline(description, deadline));
         save();
     }
@@ -109,6 +123,10 @@ public class TaskList {
      * @param end End date.
      */
     public void addEvent(String description, java.time.LocalDate start, java.time.LocalDate end) {
+        assert description != null && !description.isBlank() : "Event description must be non-blank";
+        assert start != null : "Event start date must not be null";
+        assert end != null : "Event end date must not be null";
+
         tasks.add(new Event(description, start, end));
         save();
     }
@@ -120,6 +138,8 @@ public class TaskList {
      * @return The removed task.
      */
     public Task remove(int index) {
+        assert index >= 0 && index < tasks.size() : "Removal index must have been validated";
+
         Task removedTask = tasks.remove(index);
         save();
         return removedTask;
@@ -132,6 +152,8 @@ public class TaskList {
      * @param isDone {@code true} to mark as done, {@code false} to mark as not done.
      */
     public void mark(int index, boolean isDone) {
+        assert index >= 0 && index < tasks.size() : "Mark index must have been validated";
+
         if (isDone) {
             tasks.get(index).markAsDone();
         } else {
@@ -172,6 +194,8 @@ public class TaskList {
      * @return List of matching tasks.
      */
     public ArrayList<Task> findByKeyword(String keyword) {
+        assert keyword != null && !keyword.isBlank() : "Search keyword must be non-blank";
+
         String keywordInLowerCase = keyword.toLowerCase();
         ArrayList<Task> matches = new ArrayList<>();
 
