@@ -15,7 +15,7 @@ public class EventCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new EventCommand("project meeting", "2026-08-25", "2026-08-26").execute(tasks, ui, null);
+        new EventCommand("project meeting", "2026-08-25", "2026-08-26").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
@@ -29,7 +29,7 @@ public class EventCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new EventCommand("  project meeting  ", "  2026-08-25 ", " 2026-08-26  ").execute(tasks, ui, null);
+        new EventCommand("  project meeting  ", "  2026-08-25 ", " 2026-08-26  ").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
@@ -41,7 +41,7 @@ public class EventCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new EventCommand("   ", "2026-08-25", "2026-08-26").execute(tasks, ui, null);
+        new EventCommand("   ", "2026-08-25", "2026-08-26").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("""
@@ -56,7 +56,7 @@ public class EventCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new EventCommand("project meeting", "   ", " ").execute(tasks, ui, null);
+        new EventCommand("project meeting", "   ", " ").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("""
@@ -70,7 +70,7 @@ public class EventCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new EventCommand("project meeting", "2026/08/25", "2026-08-26").execute(tasks, ui, null);
+        new EventCommand("project meeting", "2026/08/25", "2026-08-26").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.getLastErrorMessage());
@@ -81,7 +81,7 @@ public class EventCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new EventCommand("project meeting", "2026-8-5", "2026-08-26").execute(tasks, ui, null);
+        new EventCommand("project meeting", "2026-8-5", "2026-08-26").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.getLastErrorMessage());

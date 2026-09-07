@@ -17,9 +17,8 @@ public class UnknownCommandTest {
         CapturingUi ui = new CapturingUi();
 
         GaryException exception = assertThrows(GaryException.class, () ->
-                new UnknownCommand().execute(tasks, ui, null));
+                new UnknownCommand().execute(tasks, ui));
 
         assertEquals("I'm sorry, but Gary doesn't know what that means!", exception.getMessage());
     }
 }
-

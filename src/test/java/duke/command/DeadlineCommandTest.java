@@ -15,7 +15,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("return book", "2026-08-25").execute(tasks, ui, null);
+        new DeadlineCommand("return book", "2026-08-25").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
@@ -29,7 +29,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("  return book  ", "  2026-08-25  ").execute(tasks, ui, null);
+        new DeadlineCommand("  return book  ", "  2026-08-25  ").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
@@ -43,7 +43,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("pay taxes", "2024-02-29").execute(tasks, ui, null);
+        new DeadlineCommand("pay taxes", "2024-02-29").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
@@ -57,7 +57,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("return book", "2026-8-5").execute(tasks, ui, null);
+        new DeadlineCommand("return book", "2026-8-5").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("Please provide a valid deadline in the format YYYY-MM-DD.", ui.getLastErrorMessage());
@@ -70,7 +70,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("   ", "2026-08-25").execute(tasks, ui, null);
+        new DeadlineCommand("   ", "2026-08-25").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("""
@@ -86,7 +86,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("return book", "   ").execute(tasks, ui, null);
+        new DeadlineCommand("return book", "   ").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("""
@@ -102,7 +102,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("return book", "2026/08/25").execute(tasks, ui, null);
+        new DeadlineCommand("return book", "2026/08/25").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("Please provide a valid deadline in the format YYYY-MM-DD.", ui.getLastErrorMessage());
@@ -115,7 +115,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("return book", "2026-13-01").execute(tasks, ui, null);
+        new DeadlineCommand("return book", "2026-13-01").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("Please provide a valid deadline in the format YYYY-MM-DD.", ui.getLastErrorMessage());
@@ -128,7 +128,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("return book", "2026-02-30").execute(tasks, ui, null);
+        new DeadlineCommand("return book", "2026-02-30").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("Please provide a valid deadline in the format YYYY-MM-DD.", ui.getLastErrorMessage());
@@ -141,7 +141,7 @@ public class DeadlineCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new DeadlineCommand("return book", "2026-08-25 extra").execute(tasks, ui, null);
+        new DeadlineCommand("return book", "2026-08-25 extra").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("Please provide a valid deadline in the format YYYY-MM-DD.", ui.getLastErrorMessage());

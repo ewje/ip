@@ -15,7 +15,7 @@ public class TodoCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new TodoCommand("read book").execute(tasks, ui, null);
+        new TodoCommand("read book").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
@@ -29,7 +29,7 @@ public class TodoCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new TodoCommand("  read book  ").execute(tasks, ui, null);
+        new TodoCommand("  read book  ").execute(tasks, ui);
 
         assertNull(ui.getLastErrorMessage());
         assertEquals(1, tasks.size());
@@ -41,7 +41,7 @@ public class TodoCommandTest {
         TaskList tasks = new TaskList();
         CapturingUi ui = new CapturingUi();
 
-        new TodoCommand("   ").execute(tasks, ui, null);
+        new TodoCommand("   ").execute(tasks, ui);
 
         assertEquals(0, tasks.size());
         assertEquals("The Todo description cannot be empty!", ui.getLastErrorMessage());

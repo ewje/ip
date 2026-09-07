@@ -54,7 +54,7 @@ public class Duke {
                 }
 
                 Command command = parser.parse(fullCommand);
-                command.execute(tasks, ui, null);
+                command.execute(tasks, ui);
                 isExit = command.isExit();
             } catch (GaryException e) {
                 ui.showError(e.getMessage());
@@ -80,7 +80,7 @@ public class Duke {
         duke.ui.GuiUi guiUi = new duke.ui.GuiUi();
         try {
             Command command = parser.parse(trimmedInput);
-            command.execute(tasks, guiUi, null);
+            command.execute(tasks, guiUi);
 
             if (command.isExit()) {
                 tasks.save();

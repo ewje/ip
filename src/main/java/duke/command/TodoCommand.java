@@ -1,6 +1,5 @@
 package duke.command;
 
-import duke.storage.Storage;
 import duke.task.TaskList;
 import duke.ui.Ui;
 
@@ -25,10 +24,9 @@ public class TodoCommand extends Command {
      *
      * @param tasks Task list to add into.
      * @param ui UI used to show success/error messages.
-     * @param storage Unused (persistence is handled through {@link TaskList}).
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public void execute(TaskList tasks, Ui ui) {
         String cleanedDescription = description.trim();
         if (cleanedDescription.isEmpty()) {
             ui.showError("The Todo description cannot be empty!");

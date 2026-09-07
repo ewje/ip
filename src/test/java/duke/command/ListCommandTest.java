@@ -17,7 +17,7 @@ public class ListCommandTest {
 
         CapturingUi ui = new CapturingUi();
 
-        new ListCommand().execute(tasks, ui, null);
+        new ListCommand().execute(tasks, ui);
 
         assertEquals(2, ui.getLastShownTaskList().size());
         assertEquals("T | 0 | read book", ui.getLastShownTaskList().get(0).toDataString());
