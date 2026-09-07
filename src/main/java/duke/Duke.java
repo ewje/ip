@@ -25,6 +25,8 @@ public class Duke {
      * @param filePath File path to load/save tasks.
      */
     public Duke(String filePath) {
+        assert filePath != null && !filePath.isBlank() : "Storage file path must be provided";
+
         this.ui = new Ui();
         Storage storage = new Storage(filePath);
         this.parser = new Parser();
@@ -54,6 +56,7 @@ public class Duke {
                 }
 
                 Command command = parser.parse(fullCommand);
+                assert command != null : "Parser must return a command for non-blank input";
                 command.execute(tasks, ui, null);
                 isExit = command.isExit();
             } catch (GaryException e) {
@@ -80,6 +83,7 @@ public class Duke {
         duke.ui.GuiUi guiUi = new duke.ui.GuiUi();
         try {
             Command command = parser.parse(trimmedInput);
+            assert command != null : "Parser must return a command for non-blank input";
             command.execute(tasks, guiUi, null);
 
             if (command.isExit()) {

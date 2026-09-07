@@ -37,6 +37,8 @@ public class Storage {
      * @param filePath Path to the storage file (e.g., {@code data/duke.txt}).
      */
     public Storage(String filePath) {
+        assert filePath != null && !filePath.isBlank() : "Storage file path must be provided";
+
         this.filePath = Path.of(filePath);
     }
 
@@ -72,6 +74,9 @@ public class Storage {
      * @throws GaryException If an I/O error occurs while writing the file.
      */
     public void save(ArrayList<Task> tasks) {
+        assert tasks != null : "Task list to save must not be null";
+        assert tasks.stream().noneMatch(task -> task == null) : "Task list to save must not contain null tasks";
+
         try {
             Files.createDirectories(filePath.getParent());
             List<String> lines = tasks.stream()
@@ -90,6 +95,8 @@ public class Storage {
      * @return The parsed {@code Task}, or {@code null} if the line is blank/invalid.
      */
     private Task parseTask(String line) {
+        assert line != null : "A line read from the storage file must not be null";
+
         if (line.isBlank()) {
             return null;
         }

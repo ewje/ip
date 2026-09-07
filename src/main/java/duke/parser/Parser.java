@@ -33,6 +33,8 @@ public class Parser {
      * @return A {@code Command} instance; returns {@link UnknownCommand} if the command keyword is not recognised.
      */
     public Command parse(String userInput) {
+        assert userInput != null && !userInput.isBlank() : "Parser input must be non-blank";
+
         String[] userSplit = userInput.trim().split(" ", 2);
         String commandWord = userSplit[0].toUpperCase();
         String arguments = (userSplit.length > 1) ? userSplit[1] : "";
