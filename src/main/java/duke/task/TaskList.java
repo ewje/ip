@@ -1,6 +1,7 @@
 package duke.task;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import duke.exception.GaryException;
 import duke.storage.Storage;
@@ -197,15 +198,9 @@ public class TaskList {
         assert keyword != null && !keyword.isBlank() : "Search keyword must be non-blank";
 
         String keywordInLowerCase = keyword.toLowerCase();
-        ArrayList<Task> matches = new ArrayList<>();
-
-        for (Task task : tasks) {
-            if (task.description.toLowerCase().contains(keywordInLowerCase)) {
-                matches.add(task);
-            }
-        }
-
-        return matches;
+        return tasks.stream()
+                .filter(task -> task.description.toLowerCase().contains(keywordInLowerCase))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
