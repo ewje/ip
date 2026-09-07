@@ -23,8 +23,7 @@ public abstract class Command {
      * @param ui The UI used to show messages/errors.
      * @param storage Storage instance used for persistence (may be {@code null} and may be unused).
      */
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
-    }
+    public abstract void execute(TaskList tasks, Ui ui, Storage storage);
 
     /**
      * Indicates whether executing this command should cause the application to exit.
