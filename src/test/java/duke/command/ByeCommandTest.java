@@ -37,6 +37,6 @@ public class ByeCommandTest {
 
         assertTrue(ui.isGoodbyeShown());
         assertTrue(Files.exists(file));
-        assertEquals("T | 0 | read book\n", Files.readString(file));
+        assertEquals("T | 0 | read book" + System.lineSeparator(), Files.readString(file));
     }
 }
