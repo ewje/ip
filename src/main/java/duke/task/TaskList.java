@@ -1,6 +1,8 @@
 package duke.task;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.stream.Collectors;
 
 import duke.exception.GaryException;
@@ -13,14 +15,18 @@ import duke.storage.Storage;
  * mutating operations will automatically trigger {@link #save()}.</p>
  */
 public class TaskList {
+    private static final int MAX_UNDO_HISTORY_SIZE = 100;
     /** Underlying list of tasks. Indices are zero-based. */
     private final ArrayList<Task> tasks;
+    /** Changes that can be undone, with the most recent change first. */
+    private final Deque<UndoAction> undoHistory;
     /** Storage used for persistence; may be {@code null} if persistence is not configured. */
     private Storage storage;
 
     /** Creates an empty task list. */
     public TaskList() {
         this.tasks = new ArrayList<>();
+        this.undoHistory = new ArrayDeque<>();
     }
 
     /**
@@ -33,6 +39,7 @@ public class TaskList {
         assert tasks.stream().noneMatch(task -> task == null) : "Initial task list must not contain null tasks";
 
         this.tasks = tasks;
+        this.undoHistory = new ArrayDeque<>();
     }
 
     /**
@@ -98,8 +105,10 @@ public class TaskList {
     public void addTodo(String description) {
         assert description != null && !description.isBlank() : "Todo description must be non-blank";
 
-        tasks.add(new ToDo(description));
+        Task addedTask = new ToDo(description);
+        tasks.add(addedTask);
         save();
+        recordUndo(() -> tasks.remove(addedTask));
     }
 
     /**
@@ -112,8 +121,10 @@ public class TaskList {
         assert description != null && !description.isBlank() : "Deadline description must be non-blank";
         assert deadline != null : "Deadline date must not be null";
 
-        tasks.add(new Deadline(description, deadline));
+        Task addedTask = new Deadline(description, deadline);
+        tasks.add(addedTask);
         save();
+        recordUndo(() -> tasks.remove(addedTask));
     }
 
     /**
@@ -128,8 +139,10 @@ public class TaskList {
         assert start != null : "Event start date must not be null";
         assert end != null : "Event end date must not be null";
 
-        tasks.add(new Event(description, start, end));
+        Task addedTask = new Event(description, start, end);
+        tasks.add(addedTask);
         save();
+        recordUndo(() -> tasks.remove(addedTask));
     }
 
     /**
@@ -143,6 +156,7 @@ public class TaskList {
 
         Task removedTask = tasks.remove(index);
         save();
+        recordUndo(() -> tasks.add(index, removedTask));
         return removedTask;
     }
 
@@ -155,12 +169,36 @@ public class TaskList {
     public void mark(int index, boolean isDone) {
         assert index >= 0 && index < tasks.size() : "Mark index must have been validated";
 
+        Task task = tasks.get(index);
+        boolean wasDone = task.isDone;
+        if (wasDone == isDone) {
+            save();
+            return;
+        }
+
         if (isDone) {
-            tasks.get(index).markAsDone();
+            task.markAsDone();
         } else {
-            tasks.get(index).markUndone();
+            task.markUndone();
         }
         save();
+        recordUndo(() -> setDone(task, wasDone));
+    }
+
+    /**
+     * Reverses the most recent task-list change and saves the restored list.
+     *
+     * @return {@code true} if a change was undone, or {@code false} if no undoable change exists.
+     */
+    public boolean undo() {
+        if (undoHistory.isEmpty()) {
+            return false;
+        }
+
+        UndoAction action = undoHistory.removeFirst();
+        action.undo();
+        save();
+        return true;
     }
 
     /**
@@ -210,5 +248,29 @@ public class TaskList {
         if (storage != null) {
             storage.save(tasks);
         }
+    }
+
+    private void recordUndo(UndoAction action) {
+        assert action != null : "Undo action must not be null";
+
+        if (undoHistory.size() == MAX_UNDO_HISTORY_SIZE) {
+            undoHistory.removeLast();
+        }
+        undoHistory.addFirst(action);
+    }
+
+    private void setDone(Task task, boolean isDone) {
+        if (isDone) {
+            task.markAsDone();
+        } else {
+            task.markUndone();
+        }
+    }
+
+    /** Reverses one recorded task-list change without recording another change. */
+    @FunctionalInterface
+    private interface UndoAction {
+        /** Reverses the recorded change. */
+        void undo();
     }
 }

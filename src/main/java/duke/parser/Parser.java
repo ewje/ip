@@ -9,6 +9,7 @@ import duke.command.FindCommand;
 import duke.command.ListCommand;
 import duke.command.MarkCommand;
 import duke.command.TodoCommand;
+import duke.command.UndoCommand;
 import duke.command.UnknownCommand;
 
 /**
@@ -49,6 +50,7 @@ public class Parser {
             case "EVENT" -> parseEvent(arguments);
             case "DELETE" -> new DeleteCommand(arguments);
             case "FIND" -> new FindCommand(arguments);
+            case "UNDO" -> new UndoCommand(arguments);
             default -> new UnknownCommand();
         };
     }

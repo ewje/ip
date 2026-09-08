@@ -16,6 +16,7 @@ import duke.command.FindCommand;
 import duke.command.ListCommand;
 import duke.command.MarkCommand;
 import duke.command.TodoCommand;
+import duke.command.UndoCommand;
 import duke.command.UnknownCommand;
 import duke.task.TaskList;
 import duke.ui.CapturingUi;
@@ -76,6 +77,18 @@ public class ParserTest {
     public void parse_find_returnsFindCommand() {
         Command command = parser.parse("find book");
         assertInstanceOf(FindCommand.class, command);
+    }
+
+    @Test
+    public void parse_undo_returnsUndoCommand() {
+        Command command = parser.parse("undo");
+        assertInstanceOf(UndoCommand.class, command);
+    }
+
+    @Test
+    public void parse_undoIsCaseInsensitive_returnsUndoCommand() {
+        Command command = parser.parse("UnDo");
+        assertInstanceOf(UndoCommand.class, command);
     }
 
     @Test

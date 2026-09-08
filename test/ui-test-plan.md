@@ -472,3 +472,49 @@ expected: |
 
   ____________________________________________________________
 ```
+
+### TC15: Undo recent task changes
+
+```ui-test
+id: TC15
+aim: Verify undo reverses recent changes in order and rejects arguments without consuming history.
+cmd: sh -c "rm -f data/duke.txt; printf 'todo read book\nmark 1\nundo 2\nundo\nundo\nlist\nbye\n' | java -cp build/classes/java/main duke.Duke"
+stdin: |
+  todo read book
+  mark 1
+  undo 2
+  undo
+  undo
+  list
+  bye
+expected: |
+   ==================================================================
+    ____
+   / ___| __ _ _ __ _   _
+  | |  _ / _` | '__| | | |
+  | |_| | (_| | |  | |_| |
+   \____|\__,_|_|   \__, |
+                    |___/
+   ==================================================================
+  HELLO! I'm GARY!
+  How can I help you today?
+  (Type bye to exit)
+
+  ____________________________________________________________
+  Got it! Here's the task you added:
+    [T] [ ] read book
+  Now you have 1 tasks in your list!
+  ____________________________________________________________
+  ____________________________________________________________
+  Gary marked task 1 as done!
+  ____________________________________________________________
+  ____________________________________________________________
+  The undo command does not take any arguments.
+  ____________________________________________________________
+  Undid the last change.
+  Undid the last change.
+  ____________________________________________________________
+  These are the tasks you have in your list!
+  ____________________________________________________________
+  Bye! Hope to see you again soon!
+```
