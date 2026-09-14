@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -129,7 +130,7 @@ public class StorageTest {
 
         storage.save(tasks);
 
-        assertEquals("T | 0 | new task\n", Files.readString(file));
+        assertEquals(List.of("T | 0 | new task"), Files.readAllLines(file));
         try (Stream<Path> files = Files.list(tempDir)) {
             assertFalse(files.anyMatch(path -> path.getFileName().toString().startsWith("gary-")));
         }

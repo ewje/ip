@@ -11,6 +11,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -184,7 +185,7 @@ public class DukeTest {
         assertTrue(output.contains("I'm sorry, but Gary doesn't know what that means!"));
         assertTrue(output.contains("1. [T] [X] read book"));
         assertTrue(output.contains("Bye! Hope to see you again soon!"));
-        assertEquals("T | 1 | read book\n", Files.readString(taskFile));
+        assertEquals(List.of("T | 1 | read book"), Files.readAllLines(taskFile));
     }
 
     @Test
