@@ -44,6 +44,21 @@ public class Task {
     }
 
     /**
+     * Checks whether another task has the same user-provided details.
+     *
+     * <p>Completion status is deliberately ignored so that marking a task does not make an otherwise identical
+     * task unique.</p>
+     *
+     * @param other Task to compare with.
+     * @return {@code true} if both tasks have the same type and description.
+     */
+    public boolean hasSameDetails(Task other) {
+        return other != null
+                && getClass().equals(other.getClass())
+                && description.equalsIgnoreCase(other.description);
+    }
+
+    /**
      * Returns a compact string representation used for saving this task to disk.
      *
      * <p>Subclasses should override this if they need to save additional fields.</p>

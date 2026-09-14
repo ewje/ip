@@ -3,6 +3,7 @@ package duke.task;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import duke.exception.GaryException;
@@ -15,6 +16,7 @@ import duke.storage.Storage;
  * mutating operations will automatically trigger {@link #save()}.</p>
  */
 public class TaskList {
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final int MAX_UNDO_HISTORY_SIZE = 100;
     /** Underlying list of tasks. Indices are zero-based. */
     private final ArrayList<Task> tasks;
@@ -101,14 +103,18 @@ public class TaskList {
      * Adds a todo task and saves the updated list (if storage is configured).
      *
      * @param description Description of the todo.
+     * @throws GaryException If the description is invalid, the task is duplicated, or saving fails.
      */
     public void addTodo(String description) {
         assert description != null && !description.isBlank() : "Todo description must be non-blank";
 
-        Task addedTask = new ToDo(description);
+        String normalizedDescription = normalizeDescription(description);
+        Task addedTask = new ToDo(normalizedDescription);
+        ensureUnique(addedTask);
+        int addedIndex = tasks.size();
         tasks.add(addedTask);
-        save();
-        recordUndo(() -> tasks.remove(addedTask));
+        saveOrRollback(() -> tasks.remove(addedTask));
+        recordUndo(() -> tasks.remove(addedTask), () -> tasks.add(addedIndex, addedTask));
     }
 
     /**
@@ -116,15 +122,19 @@ public class TaskList {
      *
      * @param description Description of the deadline.
      * @param deadline Due date.
+     * @throws GaryException If the description is invalid, the task is duplicated, or saving fails.
      */
     public void addDeadline(String description, java.time.LocalDate deadline) {
         assert description != null && !description.isBlank() : "Deadline description must be non-blank";
         assert deadline != null : "Deadline date must not be null";
 
-        Task addedTask = new Deadline(description, deadline);
+        String normalizedDescription = normalizeDescription(description);
+        Task addedTask = new Deadline(normalizedDescription, deadline);
+        ensureUnique(addedTask);
+        int addedIndex = tasks.size();
         tasks.add(addedTask);
-        save();
-        recordUndo(() -> tasks.remove(addedTask));
+        saveOrRollback(() -> tasks.remove(addedTask));
+        recordUndo(() -> tasks.remove(addedTask), () -> tasks.add(addedIndex, addedTask));
     }
 
     /**
@@ -133,16 +143,24 @@ public class TaskList {
      * @param description Description of the event.
      * @param start Start date.
      * @param end End date.
+     * @throws GaryException If the event data is invalid, the task is duplicated, or saving fails.
      */
     public void addEvent(String description, java.time.LocalDate start, java.time.LocalDate end) {
         assert description != null && !description.isBlank() : "Event description must be non-blank";
         assert start != null : "Event start date must not be null";
         assert end != null : "Event end date must not be null";
 
-        Task addedTask = new Event(description, start, end);
+        if (!start.isBefore(end)) {
+            throw new GaryException("The event start date must be before the end date.");
+        }
+
+        String normalizedDescription = normalizeDescription(description);
+        Task addedTask = new Event(normalizedDescription, start, end);
+        ensureUnique(addedTask);
+        int addedIndex = tasks.size();
         tasks.add(addedTask);
-        save();
-        recordUndo(() -> tasks.remove(addedTask));
+        saveOrRollback(() -> tasks.remove(addedTask));
+        recordUndo(() -> tasks.remove(addedTask), () -> tasks.add(addedIndex, addedTask));
     }
 
     /**
@@ -150,13 +168,14 @@ public class TaskList {
      *
      * @param index Zero-based index.
      * @return The removed task.
+     * @throws GaryException If saving fails; the removal is rolled back before the exception is thrown.
      */
     public Task remove(int index) {
         assert index >= 0 && index < tasks.size() : "Removal index must have been validated";
 
         Task removedTask = tasks.remove(index);
-        save();
-        recordUndo(() -> tasks.add(index, removedTask));
+        saveOrRollback(() -> tasks.add(index, removedTask));
+        recordUndo(() -> tasks.add(index, removedTask), () -> tasks.remove(removedTask));
         return removedTask;
     }
 
@@ -165,6 +184,7 @@ public class TaskList {
      *
      * @param index Zero-based index.
      * @param isDone {@code true} to mark as done, {@code false} to mark as not done.
+     * @throws GaryException If saving fails; the status change is rolled back before the exception is thrown.
      */
     public void mark(int index, boolean isDone) {
         assert index >= 0 && index < tasks.size() : "Mark index must have been validated";
@@ -181,14 +201,15 @@ public class TaskList {
         } else {
             task.markUndone();
         }
-        save();
-        recordUndo(() -> setDone(task, wasDone));
+        saveOrRollback(() -> setDone(task, wasDone));
+        recordUndo(() -> setDone(task, wasDone), () -> setDone(task, isDone));
     }
 
     /**
      * Reverses the most recent task-list change and saves the restored list.
      *
      * @return {@code true} if a change was undone, or {@code false} if no undoable change exists.
+     * @throws GaryException If saving fails; the undo is rolled back and remains available to retry.
      */
     public boolean undo() {
         if (undoHistory.isEmpty()) {
@@ -197,7 +218,13 @@ public class TaskList {
 
         UndoAction action = undoHistory.removeFirst();
         action.undo();
-        save();
+        try {
+            save();
+        } catch (GaryException e) {
+            action.redo();
+            undoHistory.addFirst(action);
+            throw e;
+        }
         return true;
     }
 
@@ -235,9 +262,9 @@ public class TaskList {
     public ArrayList<Task> findByKeyword(String keyword) {
         assert keyword != null && !keyword.isBlank() : "Search keyword must be non-blank";
 
-        String keywordInLowerCase = keyword.toLowerCase();
+        String keywordInLowerCase = keyword.toLowerCase(Locale.ROOT);
         return tasks.stream()
-                .filter(task -> task.description.toLowerCase().contains(keywordInLowerCase))
+                .filter(task -> task.description.toLowerCase(Locale.ROOT).contains(keywordInLowerCase))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -250,13 +277,41 @@ public class TaskList {
         }
     }
 
-    private void recordUndo(UndoAction action) {
-        assert action != null : "Undo action must not be null";
+    private String normalizeDescription(String description) {
+        String normalizedDescription = description.strip().replaceAll("\\s+", " ");
+        if (normalizedDescription.contains("|")) {
+            throw new GaryException("Task descriptions cannot contain the '|' character.");
+        }
+        if (normalizedDescription.length() > MAX_DESCRIPTION_LENGTH) {
+            throw new GaryException("Task descriptions cannot exceed " + MAX_DESCRIPTION_LENGTH + " characters.");
+        }
+        return normalizedDescription;
+    }
+
+    private void ensureUnique(Task newTask) {
+        boolean isDuplicate = tasks.stream().anyMatch(task -> task.hasSameDetails(newTask));
+        if (isDuplicate) {
+            throw new GaryException("That task already exists in your list.");
+        }
+    }
+
+    private void saveOrRollback(Runnable rollbackOperation) {
+        try {
+            save();
+        } catch (GaryException e) {
+            rollbackOperation.run();
+            throw e;
+        }
+    }
+
+    private void recordUndo(Runnable undoOperation, Runnable redoOperation) {
+        assert undoOperation != null : "Undo operation must not be null";
+        assert redoOperation != null : "Redo operation must not be null";
 
         if (undoHistory.size() == MAX_UNDO_HISTORY_SIZE) {
             undoHistory.removeLast();
         }
-        undoHistory.addFirst(action);
+        undoHistory.addFirst(new UndoAction(undoOperation, redoOperation));
     }
 
     private void setDone(Task task, boolean isDone) {
@@ -267,10 +322,22 @@ public class TaskList {
         }
     }
 
-    /** Reverses one recorded task-list change without recording another change. */
-    @FunctionalInterface
-    private interface UndoAction {
-        /** Reverses the recorded change. */
-        void undo();
+    /** Stores the inverse operations needed to safely undo or restore one task-list change. */
+    private static class UndoAction {
+        private final Runnable undoOperation;
+        private final Runnable redoOperation;
+
+        UndoAction(Runnable undoOperation, Runnable redoOperation) {
+            this.undoOperation = undoOperation;
+            this.redoOperation = redoOperation;
+        }
+
+        void undo() {
+            undoOperation.run();
+        }
+
+        void redo() {
+            redoOperation.run();
+        }
     }
 }
