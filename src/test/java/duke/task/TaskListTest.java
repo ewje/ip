@@ -2,6 +2,7 @@ package duke.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -72,6 +73,16 @@ public class TaskListTest {
     }
 
     @Test
+    public void addTodo_descriptionAtLimit_addsTask() {
+        TaskList tasks = new TaskList();
+        String description = "a".repeat(200);
+
+        tasks.addTodo(description);
+
+        assertEquals("T | 0 | " + description, tasks.getLast().toDataString());
+    }
+
+    @Test
     public void addDeadline_increasesSize_andStoresDeadline() {
         TaskList tasks = new TaskList();
 
@@ -82,6 +93,27 @@ public class TaskListTest {
     }
 
     @Test
+    public void addDeadline_duplicateDetails_throwsGaryException() {
+        TaskList tasks = new TaskList();
+        tasks.addDeadline("return book", LocalDate.of(2026, 8, 25));
+
+        assertThrows(GaryException.class, () ->
+                tasks.addDeadline("RETURN BOOK", LocalDate.of(2026, 8, 25)));
+
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void addDeadline_sameDescriptionDifferentDate_addsBothTasks() {
+        TaskList tasks = new TaskList();
+        tasks.addDeadline("return book", LocalDate.of(2026, 8, 25));
+
+        tasks.addDeadline("return book", LocalDate.of(2026, 8, 26));
+
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
     public void addEvent_increasesSize_andStoresEvent() {
         TaskList tasks = new TaskList();
 
@@ -89,6 +121,27 @@ public class TaskListTest {
 
         assertEquals(1, tasks.size());
         assertEquals("E | 0 | project meeting | 2026-08-25 | 2026-08-26", tasks.getLast().toDataString());
+    }
+
+    @Test
+    public void addEvent_duplicateDetails_throwsGaryException() {
+        TaskList tasks = new TaskList();
+        tasks.addEvent("project meeting", LocalDate.of(2026, 8, 25), LocalDate.of(2026, 8, 26));
+
+        assertThrows(GaryException.class, () ->
+                tasks.addEvent("PROJECT MEETING", LocalDate.of(2026, 8, 25), LocalDate.of(2026, 8, 26)));
+
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void addEvent_sameDescriptionDifferentDates_addsBothTasks() {
+        TaskList tasks = new TaskList();
+        tasks.addEvent("project meeting", LocalDate.of(2026, 8, 25), LocalDate.of(2026, 8, 26));
+
+        tasks.addEvent("project meeting", LocalDate.of(2026, 8, 26), LocalDate.of(2026, 8, 27));
+
+        assertEquals(2, tasks.size());
     }
 
     @Test
@@ -111,6 +164,26 @@ public class TaskListTest {
         tasks.setStorage(new Storage(blockingParent.resolve("duke.txt").toString()));
 
         assertThrows(GaryException.class, () -> tasks.addTodo("read book"));
+
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void addDeadline_saveFails_rollsBackAddition() throws Exception {
+        TaskList tasks = createTaskListWithFailingStorage();
+
+        assertThrows(GaryException.class, () ->
+                tasks.addDeadline("return book", LocalDate.of(2026, 8, 25)));
+
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void addEvent_saveFails_rollsBackAddition() throws Exception {
+        TaskList tasks = createTaskListWithFailingStorage();
+
+        assertThrows(GaryException.class, () ->
+                tasks.addEvent("meeting", LocalDate.of(2026, 8, 25), LocalDate.of(2026, 8, 26)));
 
         assertEquals(0, tasks.size());
     }
@@ -245,6 +318,26 @@ public class TaskListTest {
     }
 
     @Test
+    public void undo_afterAddingDeadline_removesAddedTask() {
+        TaskList tasks = new TaskList();
+        tasks.addDeadline("return book", LocalDate.of(2026, 8, 25));
+
+        assertTrue(tasks.undo());
+
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void undo_afterAddingEvent_removesAddedTask() {
+        TaskList tasks = new TaskList();
+        tasks.addEvent("meeting", LocalDate.of(2026, 8, 25), LocalDate.of(2026, 8, 26));
+
+        assertTrue(tasks.undo());
+
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
     public void undo_afterDeletingTask_restoresExactTaskAtOriginalPosition() {
         TaskList tasks = new TaskList();
         tasks.addTodo("first");
@@ -346,5 +439,36 @@ public class TaskListTest {
 
         assertFalse(tasks.undo());
         assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void add_existingTask_addsWithoutCreatingUndoHistory() {
+        TaskList tasks = new TaskList();
+        Task task = new ToDo("loaded task");
+
+        tasks.add(task);
+
+        assertSame(task, tasks.get(0));
+        assertFalse(tasks.undo());
+    }
+
+    @Test
+    public void asList_returnsTasksInInsertionOrder() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("first");
+        tasks.addTodo("second");
+
+        ArrayList<Task> result = tasks.asList();
+
+        assertEquals("T | 0 | first", result.get(0).toDataString());
+        assertEquals("T | 0 | second", result.get(1).toDataString());
+    }
+
+    private TaskList createTaskListWithFailingStorage() throws Exception {
+        Path blockingParent = tempDir.resolve("blocking-file-" + System.nanoTime());
+        Files.writeString(blockingParent, "content");
+        TaskList tasks = new TaskList();
+        tasks.setStorage(new Storage(blockingParent.resolve("duke.txt").toString()));
+        return tasks;
     }
 }
