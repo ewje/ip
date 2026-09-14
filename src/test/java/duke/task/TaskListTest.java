@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -21,6 +22,62 @@ public class TaskListTest {
 
     @TempDir
     Path tempDir;
+
+    @Test
+    public void constructor_nullInitialList_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> new TaskList(null));
+    }
+
+    @Test
+    public void constructor_initialListContainingNull_throwsAssertionError() {
+        ArrayList<Task> initialTasks = new ArrayList<>();
+        initialTasks.add(null);
+
+        assertThrows(AssertionError.class, () -> new TaskList(initialTasks));
+    }
+
+    @Test
+    public void setStorage_nullStorage_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> new TaskList().setStorage(null));
+    }
+
+    @Test
+    public void getLast_emptyList_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> new TaskList().getLast());
+    }
+
+    @Test
+    public void add_nullTask_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> new TaskList().add(null));
+    }
+
+    @Test
+    public void addTypedTask_invalidRequiredArguments_throwAssertionError() {
+        TaskList tasks = new TaskList();
+        LocalDate start = LocalDate.of(2026, 8, 25);
+        LocalDate end = LocalDate.of(2026, 8, 26);
+
+        assertThrows(AssertionError.class, () -> tasks.addTodo(null));
+        assertThrows(AssertionError.class, () -> tasks.addTodo(" "));
+        assertThrows(AssertionError.class, () -> tasks.addDeadline(null, end));
+        assertThrows(AssertionError.class, () -> tasks.addDeadline("return book", null));
+        assertThrows(AssertionError.class, () -> tasks.addEvent(null, start, end));
+        assertThrows(AssertionError.class, () -> tasks.addEvent("meeting", null, end));
+        assertThrows(AssertionError.class, () -> tasks.addEvent("meeting", start, null));
+    }
+
+    @Test
+    public void listOperations_invalidRequiredArguments_throwAssertionError() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+
+        assertThrows(AssertionError.class, () -> tasks.remove(-1));
+        assertThrows(AssertionError.class, () -> tasks.remove(1));
+        assertThrows(AssertionError.class, () -> tasks.mark(-1, true));
+        assertThrows(AssertionError.class, () -> tasks.mark(1, true));
+        assertThrows(AssertionError.class, () -> tasks.findByKeyword(null));
+        assertThrows(AssertionError.class, () -> tasks.findByKeyword(" "));
+    }
 
     @Test
     public void addTodo_increasesSize_andStoresTodo() {
@@ -230,6 +287,40 @@ public class TaskListTest {
     }
 
     @Test
+    public void undoDeletion_saveFails_reappliesDeletionAndKeepsHistory() throws Exception {
+        Path validFile = tempDir.resolve("valid-delete.txt");
+        TaskList tasks = new TaskList();
+        tasks.setStorage(new Storage(validFile.toString()));
+        tasks.addTodo("read book");
+        tasks.remove(0);
+        tasks.setStorage(createFailingStorage());
+
+        assertThrows(GaryException.class, tasks::undo);
+        assertEquals(0, tasks.size());
+
+        tasks.setStorage(new Storage(validFile.toString()));
+        assertTrue(tasks.undo());
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void undoMark_saveFails_reappliesStatusAndKeepsHistory() throws Exception {
+        Path validFile = tempDir.resolve("valid-mark.txt");
+        TaskList tasks = new TaskList();
+        tasks.setStorage(new Storage(validFile.toString()));
+        tasks.addTodo("read book");
+        tasks.mark(0, true);
+        tasks.setStorage(createFailingStorage());
+
+        assertThrows(GaryException.class, tasks::undo);
+        assertEquals("T | 1 | read book", tasks.get(0).toDataString());
+
+        tasks.setStorage(new Storage(validFile.toString()));
+        assertTrue(tasks.undo());
+        assertEquals("T | 0 | read book", tasks.get(0).toDataString());
+    }
+
+    @Test
     public void mark_marksTaskDone() {
         TaskList tasks = new TaskList();
         tasks.addTodo("read book");
@@ -297,6 +388,20 @@ public class TaskListTest {
         tasks.addTodo("read book");
 
         assertEquals(1, tasks.findByKeyword("BOOK").size());
+    }
+
+    @Test
+    public void findByKeyword_underTurkishLocale_remainsCaseInsensitive() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("FILE REPORT");
+        Locale originalLocale = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+
+            assertEquals(1, tasks.findByKeyword("file").size());
+        } finally {
+            Locale.setDefault(originalLocale);
+        }
     }
 
     @Test
@@ -465,10 +570,14 @@ public class TaskListTest {
     }
 
     private TaskList createTaskListWithFailingStorage() throws Exception {
+        TaskList tasks = new TaskList();
+        tasks.setStorage(createFailingStorage());
+        return tasks;
+    }
+
+    private Storage createFailingStorage() throws Exception {
         Path blockingParent = tempDir.resolve("blocking-file-" + System.nanoTime());
         Files.writeString(blockingParent, "content");
-        TaskList tasks = new TaskList();
-        tasks.setStorage(new Storage(blockingParent.resolve("duke.txt").toString()));
-        return tasks;
+        return new Storage(blockingParent.resolve("duke.txt").toString());
     }
 }

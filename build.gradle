@@ -50,8 +50,13 @@ jacoco {
     toolVersion = '0.8.14'
 }
 
+def testableClasses = sourceSets.main.output.asFileTree.matching {
+    exclude 'duke/gui/**'
+}
+
 jacocoTestReport {
     dependsOn test
+    classDirectories.setFrom(testableClasses)
 
     reports {
         html.required = true
@@ -59,7 +64,22 @@ jacocoTestReport {
     }
 }
 
+jacocoTestCoverageVerification {
+    dependsOn test
+    classDirectories.setFrom(testableClasses)
+
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                minimum = 0.95
+            }
+        }
+    }
+}
+
 test.finalizedBy jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
 
 application {
     // Entry point for the app.

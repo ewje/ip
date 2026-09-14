@@ -94,6 +94,19 @@ public class StorageTest {
     }
 
     @Test
+    public void load_windowsLineEndings_loadsEveryTask() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "T | 0 | read book\r\nD | 1 | return book | 2026-08-25\r\n");
+        Storage storage = new Storage(file.toString());
+
+        ArrayList<Task> loaded = storage.load();
+
+        assertEquals(2, loaded.size());
+        assertEquals("T | 0 | read book", loaded.get(0).toDataString());
+        assertEquals("D | 1 | return book | 2026-08-25", loaded.get(1).toDataString());
+    }
+
+    @Test
     public void save_createsParentDirectories() {
         Path nested = tempDir.resolve("nested").resolve("more").resolve("duke.txt");
         Storage storage = new Storage(nested.toString());
@@ -141,6 +154,22 @@ public class StorageTest {
         GaryException exception = assertThrows(GaryException.class, () -> storage.save(new ArrayList<>()));
 
         assertEquals("Could not save tasks. Check file permissions and available disk space.", exception.getMessage());
+    }
+
+    @Test
+    public void save_nullTaskList_throwsAssertionError() {
+        Storage storage = new Storage(tempDir.resolve("duke.txt").toString());
+
+        assertThrows(AssertionError.class, () -> storage.save(null));
+    }
+
+    @Test
+    public void save_taskListContainingNull_throwsAssertionError() {
+        Storage storage = new Storage(tempDir.resolve("duke.txt").toString());
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(null);
+
+        assertThrows(AssertionError.class, () -> storage.save(tasks));
     }
 
     @Test

@@ -2,11 +2,17 @@ package duke.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 public class TaskTest {
+
+    @Test
+    public void constructor_nullDescription_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> new Task(null));
+    }
 
     @Test
     public void getStatusIcon_initiallyNotDone_returnsSpace() {
