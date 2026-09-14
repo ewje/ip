@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Circle?>
 
 <fx:root type="HBox"
          xmlns="http://javafx.com/javafx"
@@ -13,8 +13,7 @@
          styleClass="dialog-box">
     <children>
         <Label fx:id="dialog" wrapText="true" styleClass="dialog-label" />
-        <ImageView fx:id="displayPicture"
-                   fitHeight="40.0" fitWidth="40.0" pickOnBounds="true"
-                   preserveRatio="true" styleClass="display-picture" />
+        <Circle fx:id="displayPicture" mouseTransparent="true" radius="20.0"
+                smooth="true" styleClass="display-picture" />
     </children>
 </fx:root>

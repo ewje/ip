@@ -14,6 +14,17 @@ public class DukeTest {
     private Path temporaryDirectory;
 
     @Test
+    public void getWelcomeMessage_returnsGreetingWithoutTerminalBanner() {
+        Duke duke = new Duke(temporaryDirectory.resolve("duke.txt").toString());
+
+        String welcomeMessage = duke.getWelcomeMessage();
+
+        assertEquals("HELLO! I'm GARY!\n"
+                + "How can I help you today?\n"
+                + "(Type bye to exit)", welcomeMessage);
+    }
+
+    @Test
     public void getCommandResponse_unknownCommand_returnsErrorResponse() {
         Duke duke = new Duke(temporaryDirectory.resolve("duke.txt").toString());
 

@@ -81,6 +81,15 @@ public class Duke {
     }
 
     /**
+     * Returns the greeting displayed when the GUI opens.
+     *
+     * @return Welcome message without the terminal-only banner.
+     */
+    public String getWelcomeMessage() {
+        return ui.getWelcomeMessage();
+    }
+
+    /**
      * Processes one line of user input and returns its text and display type.
      *
      * @param input User input string.
