@@ -1,12 +1,14 @@
 package duke.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -21,6 +23,22 @@ public class StorageTest {
 
     @TempDir
     Path tempDir;
+
+    @Test
+    public void constructor_missingPath_throwsGaryException() {
+        GaryException nullPathException = assertThrows(GaryException.class, () -> new Storage(null));
+        GaryException blankPathException = assertThrows(GaryException.class, () -> new Storage("   "));
+
+        assertEquals("The task storage path is missing.", nullPathException.getMessage());
+        assertEquals("The task storage path is missing.", blankPathException.getMessage());
+    }
+
+    @Test
+    public void constructor_invalidPath_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () -> new Storage("invalid\0path"));
+
+        assertEquals("The task storage path is invalid.", exception.getMessage());
+    }
 
     @Test
     public void load_missingFile_returnsEmptyList() {
@@ -76,6 +94,19 @@ public class StorageTest {
     }
 
     @Test
+    public void load_windowsLineEndings_loadsEveryTask() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "T | 0 | read book\r\nD | 1 | return book | 2026-08-25\r\n");
+        Storage storage = new Storage(file.toString());
+
+        ArrayList<Task> loaded = storage.load();
+
+        assertEquals(2, loaded.size());
+        assertEquals("T | 0 | read book", loaded.get(0).toDataString());
+        assertEquals("D | 1 | return book | 2026-08-25", loaded.get(1).toDataString());
+    }
+
+    @Test
     public void save_createsParentDirectories() {
         Path nested = tempDir.resolve("nested").resolve("more").resolve("duke.txt");
         Storage storage = new Storage(nested.toString());
@@ -86,6 +117,59 @@ public class StorageTest {
         storage.save(toSave);
 
         assertEquals(true, Files.exists(nested));
+    }
+
+    @Test
+    public void save_existingFile_replacesOldContentsAndRemovesTemporaryFile() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "old contents\n");
+        Storage storage = new Storage(file.toString());
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(new ToDo("new task"));
+
+        storage.save(tasks);
+
+        assertEquals("T | 0 | new task\n", Files.readString(file));
+        try (Stream<Path> files = Files.list(tempDir)) {
+            assertFalse(files.anyMatch(path -> path.getFileName().toString().startsWith("gary-")));
+        }
+    }
+
+    @Test
+    public void save_emptyList_createsEmptyFile() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Storage storage = new Storage(file.toString());
+
+        storage.save(new ArrayList<>());
+
+        assertEquals("", Files.readString(file));
+    }
+
+    @Test
+    public void save_parentPathIsFile_throwsGaryException() throws Exception {
+        Path blockingParent = tempDir.resolve("not-a-directory");
+        Files.writeString(blockingParent, "content");
+        Storage storage = new Storage(blockingParent.resolve("duke.txt").toString());
+
+        GaryException exception = assertThrows(GaryException.class, () -> storage.save(new ArrayList<>()));
+
+        assertEquals("Could not save tasks. Check file permissions and available disk space.", exception.getMessage());
+    }
+
+    @Test
+    public void save_nullTaskList_throwsAssertionError() {
+        Storage storage = new Storage(tempDir.resolve("duke.txt").toString());
+
+        assertThrows(AssertionError.class, () -> storage.save(null));
+    }
+
+    @Test
+    public void save_taskListContainingNull_throwsAssertionError() {
+        Storage storage = new Storage(tempDir.resolve("duke.txt").toString());
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(null);
+
+        assertThrows(AssertionError.class, () -> storage.save(tasks));
     }
 
     @Test
@@ -125,6 +209,40 @@ public class StorageTest {
 
         assertEquals("Task file data is invalid on line 1: the completion status must be 0 or 1.",
                 exception.getMessage());
+    }
+
+    @Test
+    public void load_incorrectFieldCount_throwsGaryException() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "T | 0 | read book | unexpected\n");
+        Storage storage = new Storage(file.toString());
+
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 1: the number of fields is incorrect.",
+                exception.getMessage());
+    }
+
+    @Test
+    public void load_emptyDescription_throwsGaryException() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "T | 0 |    \n");
+        Storage storage = new Storage(file.toString());
+
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 1: the description is empty.", exception.getMessage());
+    }
+
+    @Test
+    public void load_repeatedDescriptionWhitespace_normalizesDescription() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "T | 0 | read    the\tbook\n");
+        Storage storage = new Storage(file.toString());
+
+        ArrayList<Task> tasks = storage.load();
+
+        assertEquals("T | 0 | read the book", tasks.get(0).toDataString());
     }
 
     @Test

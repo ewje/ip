@@ -59,6 +59,17 @@ public class MarkCommandTest {
     }
 
     @Test
+    public void execute_numberLargerThanInteger_throwsGaryException() {
+        TaskList tasks = new TaskList();
+        CapturingUi ui = new CapturingUi();
+
+        GaryException exception = assertThrows(GaryException.class, () ->
+                new MarkCommand("9".repeat(20), true).execute(tasks, ui));
+
+        assertEquals("That task number is too large.", exception.getMessage());
+    }
+
+    @Test
     public void execute_markDone_marksTaskAndShowsUi() {
         TaskList tasks = new TaskList();
         tasks.addTodo("read book");

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 
 import duke.command.ByeCommand;
@@ -114,6 +116,18 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_underTurkishLocale_remainsCaseInsensitive() {
+        Locale originalLocale = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+
+            assertInstanceOf(ListCommand.class, parser.parse("list"));
+        } finally {
+            Locale.setDefault(originalLocale);
+        }
+    }
+
+    @Test
     public void parse_deadlineWithoutByIndicator_throwsGaryException() {
         GaryException exception = assertThrows(GaryException.class, () -> parser.parse("deadline return book"));
 
@@ -159,6 +173,37 @@ public class ParserTest {
         GaryException exception = assertThrows(GaryException.class, () -> parser.parse("   "));
 
         assertEquals("Please enter a command.", exception.getMessage());
+    }
+
+    @Test
+    public void parse_nullInput_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () -> parser.parse(null));
+
+        assertEquals("Please enter a command.", exception.getMessage());
+    }
+
+    @Test
+    public void parse_commandAtLengthLimit_returnsCommand() {
+        Command command = parser.parse("todo " + "a".repeat(495));
+
+        assertInstanceOf(TodoCommand.class, command);
+    }
+
+    @Test
+    public void parse_deadlineMarkerWithoutDate_throwsGaryException() {
+        assertThrows(GaryException.class, () -> parser.parse("deadline return book /by"));
+    }
+
+    @Test
+    public void parse_eventWithRepeatedToIndicator_throwsGaryException() {
+        assertThrows(GaryException.class, () -> parser.parse(
+                "event meeting /from 2026-08-25 /to 2026-08-26 /to 2026-08-27"));
+    }
+
+    @Test
+    public void parse_eventWithMarkersInWrongOrder_throwsGaryException() {
+        assertThrows(GaryException.class, () ->
+                parser.parse("event meeting /to 2026-08-26 /from 2026-08-25"));
     }
 
     @Test

@@ -1,10 +1,18 @@
 package duke.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 public class TaskTest {
+
+    @Test
+    public void constructor_nullDescription_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> new Task(null));
+    }
 
     @Test
     public void getStatusIcon_initiallyNotDone_returnsSpace() {
@@ -58,5 +66,28 @@ public class TaskTest {
         Task task = new Task("");
         assertEquals("[ ] ", task.toString());
     }
-}
 
+    @Test
+    public void hasSameDetails_sameTypeAndDescriptionIgnoringCase_returnsTrue() {
+        Task first = new Task("Read Book");
+        Task second = new Task("read book");
+        second.markAsDone();
+
+        assertTrue(first.hasSameDetails(second));
+    }
+
+    @Test
+    public void hasSameDetails_differentDescription_returnsFalse() {
+        assertFalse(new Task("read book").hasSameDetails(new Task("write notes")));
+    }
+
+    @Test
+    public void hasSameDetails_differentTaskType_returnsFalse() {
+        assertFalse(new Task("read book").hasSameDetails(new ToDo("read book")));
+    }
+
+    @Test
+    public void hasSameDetails_nullTask_returnsFalse() {
+        assertFalse(new Task("read book").hasSameDetails(null));
+    }
+}
