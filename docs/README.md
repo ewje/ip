@@ -21,6 +21,18 @@
 
 > **Note:** Gary requires **JDK 25**.
 
+To launch a downloaded copy of Gary, open a terminal in the folder containing
+`duke.jar` and run:
+
+```text
+java -jar duke.jar
+```
+
+The same JAR contains the JavaFX libraries needed by Windows, macOS, and Linux.
+
+If you are running Gary from its source code instead, use the command for your
+platform:
+
 | Platform | Graphical interface | Terminal interface |
 | --- | --- | --- |
 | macOS / Linux | `./gradlew runGui` | `./gradlew run` |

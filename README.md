@@ -27,4 +27,6 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 ## Running (Gradle)
 
 - Run the CLI app: `./gradlew run`
-- Run the JavaFX GUI check: `./gradlew runGui`
+- Run the JavaFX GUI: `./gradlew runGui`
+- Build the cross-platform GUI JAR: `./gradlew shadowJar`
+- Launch the built GUI JAR: `java -jar build/libs/duke.jar`
