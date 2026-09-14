@@ -58,4 +58,17 @@ public class DialogBox extends HBox {
         db.flip();
         return db;
     }
+
+    /**
+     * Creates a visually highlighted dialog for an error response from Duke.
+     *
+     * @param text Error message to display.
+     * @param img Image representing Duke.
+     * @return Dialog box styled as an error.
+     */
+    public static DialogBox getErrorDialog(String text, Image img) {
+        DialogBox dialogBox = getDukeDialog(text, img);
+        dialogBox.dialog.getStyleClass().add("error-label");
+        return dialogBox;
+    }
 }

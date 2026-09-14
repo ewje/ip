@@ -77,9 +77,19 @@ public class Duke {
      * @return Response to show to the user.
      */
     public String getResponse(String input) {
+        return getCommandResponse(input).text();
+    }
+
+    /**
+     * Processes one line of user input and returns its text and display type.
+     *
+     * @param input User input string.
+     * @return Response text together with whether it represents an error.
+     */
+    public CommandResponse getCommandResponse(String input) {
         String trimmedInput = input == null ? "" : input.trim();
         if (trimmedInput.isEmpty()) {
-            return "Please enter a command.";
+            return new CommandResponse("Please enter a command.", true);
         }
 
         duke.ui.GuiUi guiUi = new duke.ui.GuiUi();
@@ -96,7 +106,8 @@ public class Duke {
             guiUi.showError(e.getMessage());
         }
 
-        return guiUi.consumeOutput();
+        boolean isError = guiUi.hasError();
+        return new CommandResponse(guiUi.consumeOutput(), isError);
     }
 
     public static void main(String[] args) {
