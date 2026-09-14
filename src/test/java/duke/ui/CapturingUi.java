@@ -12,7 +12,7 @@ public class CapturingUi extends Ui {
     private String lastErrorMessage;
     private String lastMessage;
 
-    private boolean goodbyeShown;
+    private boolean isGoodbyeShown;
 
     private Task lastAddedTask;
     private Integer lastAddedTaskCount;
@@ -21,7 +21,7 @@ public class CapturingUi extends Ui {
     private Integer lastRemovedTaskCount;
 
     private Integer lastMarkedTaskNumber;
-    private Boolean lastMarkedIsDone;
+    private Boolean isLastMarkedTaskDone;
 
     private ArrayList<Task> lastShownTaskList;
     private ArrayList<Task> lastShownMatchingTasks;
@@ -35,7 +35,7 @@ public class CapturingUi extends Ui {
     }
 
     public boolean isGoodbyeShown() {
-        return goodbyeShown;
+        return isGoodbyeShown;
     }
 
     public Task getLastAddedTask() {
@@ -58,8 +58,8 @@ public class CapturingUi extends Ui {
         return lastMarkedTaskNumber;
     }
 
-    public Boolean getLastMarkedIsDone() {
-        return lastMarkedIsDone;
+    public Boolean isLastMarkedTaskDone() {
+        return isLastMarkedTaskDone;
     }
 
     public ArrayList<Task> getLastShownTaskList() {
@@ -82,7 +82,7 @@ public class CapturingUi extends Ui {
 
     @Override
     public void showGoodbye() {
-        goodbyeShown = true;
+        isGoodbyeShown = true;
     }
 
     @Override
@@ -100,7 +100,7 @@ public class CapturingUi extends Ui {
     @Override
     public void showMarkedTask(int taskNumber, boolean isDone) {
         lastMarkedTaskNumber = taskNumber;
-        lastMarkedIsDone = isDone;
+        isLastMarkedTaskDone = isDone;
     }
 
     @Override

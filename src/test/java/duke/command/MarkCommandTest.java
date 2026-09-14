@@ -79,7 +79,7 @@ public class MarkCommandTest {
 
         assertEquals("T | 1 | read book", tasks.get(0).toDataString());
         assertEquals(1, ui.getLastMarkedTaskNumber());
-        assertEquals(true, ui.getLastMarkedIsDone());
+        assertEquals(true, ui.isLastMarkedTaskDone());
     }
 
     @Test
@@ -93,6 +93,6 @@ public class MarkCommandTest {
 
         assertEquals("T | 0 | read book", tasks.get(0).toDataString());
         assertEquals(1, ui.getLastMarkedTaskNumber());
-        assertEquals(false, ui.getLastMarkedIsDone());
+        assertEquals(false, ui.isLastMarkedTaskDone());
     }
 }
