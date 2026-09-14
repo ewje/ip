@@ -10,6 +10,18 @@ import duke.task.Task;
  */
 public class Ui {
     private static final String LINE = "____________________________________________________________";
+    private static final String WELCOME_MESSAGE = "HELLO! I'm GARY!\n"
+            + "How can I help you today?\n"
+            + "(Type bye to exit)";
+
+    /**
+     * Returns the greeting shown when the application starts.
+     *
+     * @return Welcome message without the terminal-only banner.
+     */
+    public String getWelcomeMessage() {
+        return WELCOME_MESSAGE;
+    }
 
     /**
      * Shows the welcome banner and greeting message.
@@ -25,12 +37,7 @@ public class Ui {
                                   |___/\s
                  ==================================================================\s
                 """;
-        String greeting = """
-                HELLO! I'm GARY!
-                How can I help you today?
-                (Type bye to exit)
-                """;
-        System.out.println(banner + greeting);
+        System.out.println(banner + WELCOME_MESSAGE + System.lineSeparator());
     }
 
     /**

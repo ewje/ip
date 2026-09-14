@@ -2,6 +2,7 @@ package duke.gui;
 
 import java.io.InputStream;
 
+import duke.CommandResponse;
 import duke.Duke;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -51,6 +52,8 @@ public class MainWindow extends AnchorPane {
      */
     public void setDuke(Duke duke) {
         this.duke = duke;
+        dialogContainer.getChildren().add(
+                DialogBox.getDukeDialog(duke.getWelcomeMessage(), dukeImage));
     }
 
     /**
@@ -62,10 +65,13 @@ public class MainWindow extends AnchorPane {
         assert duke != null : "Duke instance must be injected before handling input";
 
         String input = userInput.getText();
-        String response = duke.getResponse(input);
+        CommandResponse response = duke.getCommandResponse(input);
+        DialogBox responseDialog = response.isError()
+                ? DialogBox.getErrorDialog(response.text(), dukeImage)
+                : DialogBox.getDukeDialog(response.text(), dukeImage);
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
-                DialogBox.getDukeDialog(response, dukeImage)
+                responseDialog
         );
         userInput.clear();
 

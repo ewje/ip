@@ -12,6 +12,7 @@ import duke.task.Task;
  */
 public class GuiUi extends Ui {
     private final StringBuilder output = new StringBuilder();
+    private boolean hasError;
 
     /**
      * Returns and clears the accumulated output.
@@ -21,12 +22,22 @@ public class GuiUi extends Ui {
     public String consumeOutput() {
         String result = output.toString().trim();
         output.setLength(0);
+        hasError = false;
         return result;
+    }
+
+    /**
+     * Returns whether an error was added to this UI's output.
+     *
+     * @return {@code true} if the output contains an error, otherwise {@code false}.
+     */
+    public boolean hasError() {
+        return hasError;
     }
 
     private void appendLine(String line) {
         if (output.length() > 0) {
-            output.append(System.lineSeparator());
+            output.append('\n');
         }
         output.append(line);
     }
@@ -39,6 +50,7 @@ public class GuiUi extends Ui {
 
     @Override
     public void showError(String message) {
+        hasError = true;
         appendLine(message);
     }
 
