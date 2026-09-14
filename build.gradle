@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'jacoco'
     id 'com.gradleup.shadow' version '9.5.1'
     id 'checkstyle'
     id 'org.openjfx.javafxplugin' version '0.1.0'
@@ -44,6 +45,21 @@ test {
         showStandardStreams = false
     }
 }
+
+jacoco {
+    toolVersion = '0.8.14'
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+test.finalizedBy jacocoTestReport
 
 application {
     // Entry point for the app.
