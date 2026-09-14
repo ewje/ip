@@ -1,13 +1,15 @@
 package duke.storage;
 
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import duke.exception.GaryException;
 import duke.task.Deadline;
@@ -25,10 +27,11 @@ import duke.task.ToDo;
  *   <li>Event: {@code E | <0/1> | <description> | <YYYY-MM-DD> | <YYYY-MM-DD>}</li>
  * </ul>
  *
- * <p>For invalid/blank lines, this class skips the line. For file I/O failures, it throws a
- * {@link GaryException} with a user-friendly message.</p>
+ * <p>Blank lines are ignored. Malformed task data and file I/O failures produce a user-facing
+ * {@link GaryException} rather than allowing startup to fail unexpectedly.</p>
  */
 public class Storage {
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
     private final Path filePath;
 
     /**
@@ -37,9 +40,15 @@ public class Storage {
      * @param filePath Path to the storage file (e.g., {@code data/duke.txt}).
      */
     public Storage(String filePath) {
-        assert filePath != null && !filePath.isBlank() : "Storage file path must be provided";
+        if (filePath == null || filePath.isBlank()) {
+            throw new GaryException("The task storage path is missing.");
+        }
 
-        this.filePath = Path.of(filePath);
+        try {
+            this.filePath = Path.of(filePath);
+        } catch (InvalidPathException e) {
+            throw new GaryException("The task storage path is invalid.");
+        }
     }
 
     /**
@@ -51,88 +60,153 @@ public class Storage {
      * @throws GaryException If an I/O error occurs while reading the file.
      */
     public ArrayList<Task> load() {
-        if (!Files.exists(filePath)) {
-            return new ArrayList<>();
-        }
-
         try {
-            return Files.readAllLines(filePath).stream()
-                    .map(this::parseTask)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toCollection(ArrayList::new));
-        } catch (IOException e) {
-            throw new GaryException("Could not load tasks from disk.");
+            if (Files.notExists(filePath)) {
+                return new ArrayList<>();
+            }
+            if (!Files.exists(filePath) || !Files.isRegularFile(filePath)) {
+                throw new GaryException("Could not read the task file. Check its location and permissions.");
+            }
+
+            List<String> lines = Files.readAllLines(filePath);
+            ArrayList<Task> tasks = new ArrayList<>();
+            for (int index = 0; index < lines.size(); index++) {
+                String line = lines.get(index);
+                if (line.isBlank()) {
+                    continue;
+                }
+
+                int lineNumber = index + 1;
+                Task task;
+                try {
+                    task = parseTask(line, lineNumber);
+                } catch (DateTimeParseException e) {
+                    throw invalidData(lineNumber, "a date is invalid");
+                }
+
+                boolean isDuplicate = tasks.stream().anyMatch(existingTask -> existingTask.hasSameDetails(task));
+                if (isDuplicate) {
+                    throw invalidData(lineNumber, "the task is duplicated");
+                }
+                tasks.add(task);
+            }
+            return tasks;
+        } catch (IOException | SecurityException e) {
+            throw new GaryException("Could not read the task file. Check its location and permissions.");
         }
     }
 
     /**
-     * Saves the given list of tasks to disk, overwriting any existing file.
+     * Saves the given list of tasks to disk using a temporary file and atomic replacement where supported.
      *
      * <p>Parent directories are created automatically if they do not exist.</p>
      *
      * @param tasks List of tasks to save.
-     * @throws GaryException If an I/O error occurs while writing the file.
+     * @throws GaryException If an I/O or permission error occurs while writing the file.
      */
     public void save(ArrayList<Task> tasks) {
         assert tasks != null : "Task list to save must not be null";
         assert tasks.stream().noneMatch(task -> task == null) : "Task list to save must not contain null tasks";
 
+        Path temporaryFile = null;
         try {
-            Files.createDirectories(filePath.getParent());
+            Path absoluteFilePath = filePath.toAbsolutePath();
+            Path parentDirectory = absoluteFilePath.getParent();
+            if (parentDirectory == null) {
+                throw new IOException("Storage path has no parent directory");
+            }
+            Files.createDirectories(parentDirectory);
             List<String> lines = tasks.stream()
                     .map(Task::toDataString)
                     .toList();
-            Files.write(filePath, lines);
-        } catch (IOException e) {
-            throw new GaryException("Could not save tasks to disk.");
+            temporaryFile = Files.createTempFile(parentDirectory, "gary-", ".tmp");
+            Files.write(temporaryFile, lines);
+            replaceFile(temporaryFile, absoluteFilePath);
+        } catch (IOException | SecurityException e) {
+            throw new GaryException("Could not save tasks. Check file permissions and available disk space.");
+        } finally {
+            deleteTemporaryFile(temporaryFile);
         }
     }
 
     /**
      * Parses a single line of the storage file into a {@link Task}.
      *
-     * @param line A single line from the storage file.
-     * @return The parsed {@code Task}, or {@code null} if the line is blank/invalid.
+     * @param line A single non-blank line from the storage file.
+     * @param lineNumber One-based line number used in error messages.
+     * @return The parsed task.
+     * @throws GaryException If the task data does not match the storage format.
      */
-    private Task parseTask(String line) {
+    private Task parseTask(String line, int lineNumber) {
         assert line != null : "A line read from the storage file must not be null";
-
-        if (line.isBlank()) {
-            return null;
-        }
+        assert !line.isBlank() : "Blank storage lines must be filtered before parsing";
 
         String[] parts = line.split("\\|", -1);
-        if (parts.length < 3) {
-            return null;
+        String type = parts[0].trim();
+        int expectedPartCount = switch (type) {
+            case "T" -> 3;
+            case "D" -> 4;
+            case "E" -> 5;
+            default -> throw invalidData(lineNumber, "the task type is unknown");
+        };
+        if (parts.length != expectedPartCount) {
+            throw invalidData(lineNumber, "the number of fields is incorrect");
         }
 
-        String type = parts[0].trim();
-        boolean isDone = parts[1].trim().equals("1");
-        String description = parts[2].trim();
+        String status = parts[1].trim();
+        if (!status.equals("0") && !status.equals("1")) {
+            throw invalidData(lineNumber, "the completion status must be 0 or 1");
+        }
+
+        String description = parts[2].trim().replaceAll("\\s+", " ");
+        if (description.isEmpty()) {
+            throw invalidData(lineNumber, "the description is empty");
+        }
+        if (description.length() > MAX_DESCRIPTION_LENGTH) {
+            throw invalidData(lineNumber, "the description is too long");
+        }
 
         Task task = switch (type) {
             case "T" -> new ToDo(description);
-            case "D" -> {
-                if (parts.length < 4) {
-                    yield null;
-                }
-                yield new Deadline(description, LocalDate.parse(parts[3].trim()));
-            }
+            case "D" -> new Deadline(description, LocalDate.parse(parts[3].trim()));
             case "E" -> {
-                if (parts.length < 5) {
-                    yield null;
+                LocalDate start = LocalDate.parse(parts[3].trim());
+                LocalDate end = LocalDate.parse(parts[4].trim());
+                if (!start.isBefore(end)) {
+                    throw invalidData(lineNumber, "the event must end after it starts");
                 }
-                yield new Event(
-                        description,
-                        LocalDate.parse(parts[3].trim()),
-                        LocalDate.parse(parts[4].trim()));
+                yield new Event(description, start, end);
             }
-            default -> null;
+            default -> throw new AssertionError("Task type must have been validated");
         };
 
-        if (task != null && isDone) {
+        if (status.equals("1")) {
             task.markAsDone();
         }
         return task;
+    }
+
+    private GaryException invalidData(int lineNumber, String reason) {
+        return new GaryException("Task file data is invalid on line " + lineNumber + ": " + reason + ".");
+    }
+
+    private void replaceFile(Path temporaryFile, Path targetFile) throws IOException {
+        try {
+            Files.move(temporaryFile, targetFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(temporaryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private void deleteTemporaryFile(Path temporaryFile) {
+        if (temporaryFile == null) {
+            return;
+        }
+
+        try {
+            Files.deleteIfExists(temporaryFile);
+        } catch (IOException | SecurityException e) {
+            // The save result is already known; a leftover temporary file should not hide it.
+        }
     }
 }
