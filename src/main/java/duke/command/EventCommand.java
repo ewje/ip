@@ -51,6 +51,11 @@ public class EventCommand extends Command {
         try {
             LocalDate startDate = LocalDate.parse(start.trim());
             LocalDate endDate = LocalDate.parse(end.trim());
+            if (!startDate.isBefore(endDate)) {
+                ui.showError("The event start date must be before the end date.");
+                return;
+            }
+
             tasks.addEvent(description.trim(), startDate, endDate);
             ui.showTaskAdded(tasks.getLast(), tasks.size());
         } catch (DateTimeParseException e) {

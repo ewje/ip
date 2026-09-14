@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import duke.exception.GaryException;
 import duke.task.Deadline;
 import duke.task.Event;
 import duke.task.Task;
@@ -57,14 +57,12 @@ public class StorageTest {
     }
 
     @Test
-    public void load_ignoresBlankAndInvalidLines() throws Exception {
+    public void load_blankLines_ignoresBlankLines() throws Exception {
         Path file = tempDir.resolve("duke.txt");
         Files.writeString(file, """
 
-                not a valid line
-                T|0
                 T | 0 | read book
-                D | 1 | missing date
+
                 D | 1 | return book | 2026-08-25
                 E | 0 | project meeting | 2026-08-25 | 2026-08-26
                 """);
@@ -91,27 +89,87 @@ public class StorageTest {
     }
 
     @Test
-    public void load_unknownTaskType_ignoresLine() throws Exception {
+    public void load_malformedLine_throwsGaryExceptionWithLineNumber() throws Exception {
         Path file = tempDir.resolve("duke.txt");
         Files.writeString(file, """
-                X | 0 | some task
                 T | 0 | read book
+                not a valid line
                 """);
         Storage storage = new Storage(file.toString());
 
-        ArrayList<Task> loaded = storage.load();
-        assertEquals(1, loaded.size());
-        assertEquals("T | 0 | read book", loaded.get(0).toDataString());
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 2: the task type is unknown.", exception.getMessage());
     }
 
     @Test
-    public void load_invalidDate_throwsDateTimeParseException() throws Exception {
+    public void load_invalidDate_throwsGaryException() throws Exception {
         Path file = tempDir.resolve("duke.txt");
         Files.writeString(file, """
                 D | 0 | return book | 2026-02-30
                 """);
         Storage storage = new Storage(file.toString());
 
-        assertThrows(DateTimeParseException.class, storage::load);
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 1: a date is invalid.", exception.getMessage());
+    }
+
+    @Test
+    public void load_invalidStatus_throwsGaryException() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "T | done | read book\n");
+        Storage storage = new Storage(file.toString());
+
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 1: the completion status must be 0 or 1.",
+                exception.getMessage());
+    }
+
+    @Test
+    public void load_descriptionLongerThanLimit_throwsGaryException() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "T | 0 | " + "a".repeat(201) + "\n");
+        Storage storage = new Storage(file.toString());
+
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 1: the description is too long.", exception.getMessage());
+    }
+
+    @Test
+    public void load_duplicateTasks_throwsGaryException() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, """
+                T | 0 | read book
+                T | 1 | READ BOOK
+                """);
+        Storage storage = new Storage(file.toString());
+
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 2: the task is duplicated.", exception.getMessage());
+    }
+
+    @Test
+    public void load_eventEndingBeforeStart_throwsGaryException() throws Exception {
+        Path file = tempDir.resolve("duke.txt");
+        Files.writeString(file, "E | 0 | meeting | 2026-08-26 | 2026-08-25\n");
+        Storage storage = new Storage(file.toString());
+
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Task file data is invalid on line 1: the event must end after it starts.",
+                exception.getMessage());
+    }
+
+    @Test
+    public void load_pathIsDirectory_throwsGaryException() {
+        Storage storage = new Storage(tempDir.toString());
+
+        GaryException exception = assertThrows(GaryException.class, storage::load);
+
+        assertEquals("Could not read the task file. Check its location and permissions.", exception.getMessage());
     }
 }

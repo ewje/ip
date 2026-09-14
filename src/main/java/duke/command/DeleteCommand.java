@@ -36,13 +36,18 @@ public class DeleteCommand extends Command {
             throw new GaryException("Please indicate which task number to delete!");
         }
 
+        String cleanedArgument = argument.trim();
+        if (!cleanedArgument.matches("[1-9]\\d*")) {
+            throw new GaryException("Please provide a positive whole-number task number.");
+        }
+
         try {
-            int taskIndex = Integer.parseInt(argument.trim()) - 1;
+            int taskIndex = Integer.parseInt(cleanedArgument) - 1;
             tasks.validateIndex(taskIndex);
             Task removedTask = tasks.remove(taskIndex);
             ui.showTaskRemoved(removedTask, tasks.size());
         } catch (NumberFormatException e) {
-            throw new GaryException("Please provide a valid number.");
+            throw new GaryException("That task number is too large.");
         }
     }
 }

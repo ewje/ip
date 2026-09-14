@@ -31,7 +31,19 @@ public class MarkCommandTest {
         GaryException exception = assertThrows(GaryException.class, () ->
                 new MarkCommand("abc", true).execute(tasks, ui));
 
-        assertEquals("Please provide a valid number.", exception.getMessage());
+        assertEquals("Please provide a positive whole-number task number.", exception.getMessage());
+    }
+
+    @Test
+    public void execute_zero_throwsGaryException() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+        CapturingUi ui = new CapturingUi();
+
+        GaryException exception = assertThrows(GaryException.class, () ->
+                new MarkCommand("0", true).execute(tasks, ui));
+
+        assertEquals("Please provide a positive whole-number task number.", exception.getMessage());
     }
 
     @Test

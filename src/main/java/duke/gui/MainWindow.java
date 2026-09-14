@@ -54,6 +54,8 @@ public class MainWindow extends AnchorPane {
         this.duke = duke;
         dialogContainer.getChildren().add(
                 DialogBox.getDukeDialog(duke.getWelcomeMessage(), dukeImage));
+        duke.getStartupError().ifPresent(error -> dialogContainer.getChildren().add(
+                DialogBox.getErrorDialog(error, dukeImage)));
     }
 
     /**
@@ -75,7 +77,7 @@ public class MainWindow extends AnchorPane {
         );
         userInput.clear();
 
-        if (input != null && input.trim().equalsIgnoreCase("bye")) {
+        if (response.shouldExit()) {
             Platform.exit();
         }
     }

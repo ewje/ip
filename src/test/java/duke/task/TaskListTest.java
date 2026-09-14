@@ -32,6 +32,46 @@ public class TaskListTest {
     }
 
     @Test
+    public void addTodo_repeatedWhitespace_normalizesDescription() {
+        TaskList tasks = new TaskList();
+
+        tasks.addTodo("  read   the\tbook  ");
+
+        assertEquals("T | 0 | read the book", tasks.getLast().toDataString());
+    }
+
+    @Test
+    public void addTodo_duplicateDetails_throwsGaryException() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+
+        GaryException exception = assertThrows(GaryException.class, () -> tasks.addTodo("READ  BOOK"));
+
+        assertEquals("That task already exists in your list.", exception.getMessage());
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void addTodo_storageDelimiterInDescription_throwsGaryException() {
+        TaskList tasks = new TaskList();
+
+        GaryException exception = assertThrows(GaryException.class, () -> tasks.addTodo("read | book"));
+
+        assertEquals("Task descriptions cannot contain the '|' character.", exception.getMessage());
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void addTodo_descriptionLongerThanLimit_throwsGaryException() {
+        TaskList tasks = new TaskList();
+
+        GaryException exception = assertThrows(GaryException.class, () -> tasks.addTodo("a".repeat(201)));
+
+        assertEquals("Task descriptions cannot exceed 200 characters.", exception.getMessage());
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
     public void addDeadline_increasesSize_andStoresDeadline() {
         TaskList tasks = new TaskList();
 
@@ -49,6 +89,71 @@ public class TaskListTest {
 
         assertEquals(1, tasks.size());
         assertEquals("E | 0 | project meeting | 2026-08-25 | 2026-08-26", tasks.getLast().toDataString());
+    }
+
+    @Test
+    public void addEvent_startSameAsEnd_throwsGaryException() {
+        TaskList tasks = new TaskList();
+        LocalDate date = LocalDate.of(2026, 8, 25);
+
+        GaryException exception = assertThrows(GaryException.class, () ->
+                tasks.addEvent("project meeting", date, date));
+
+        assertEquals("The event start date must be before the end date.", exception.getMessage());
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void addTodo_saveFails_rollsBackAddition() throws Exception {
+        Path blockingParent = tempDir.resolve("not-a-directory");
+        Files.writeString(blockingParent, "content");
+        TaskList tasks = new TaskList();
+        tasks.setStorage(new Storage(blockingParent.resolve("duke.txt").toString()));
+
+        assertThrows(GaryException.class, () -> tasks.addTodo("read book"));
+
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void remove_saveFails_rollsBackRemoval() throws Exception {
+        Path blockingParent = tempDir.resolve("not-a-directory");
+        Files.writeString(blockingParent, "content");
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+        tasks.setStorage(new Storage(blockingParent.resolve("duke.txt").toString()));
+
+        assertThrows(GaryException.class, () -> tasks.remove(0));
+
+        assertEquals(1, tasks.size());
+        assertEquals("T | 0 | read book", tasks.get(0).toDataString());
+    }
+
+    @Test
+    public void mark_saveFails_rollsBackStatusChange() throws Exception {
+        Path blockingParent = tempDir.resolve("not-a-directory");
+        Files.writeString(blockingParent, "content");
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+        tasks.setStorage(new Storage(blockingParent.resolve("duke.txt").toString()));
+
+        assertThrows(GaryException.class, () -> tasks.mark(0, true));
+
+        assertEquals("T | 0 | read book", tasks.get(0).toDataString());
+    }
+
+    @Test
+    public void undo_saveFails_restoresChangeAndHistory() throws Exception {
+        Path blockingParent = tempDir.resolve("not-a-directory");
+        Files.writeString(blockingParent, "content");
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+        tasks.setStorage(new Storage(blockingParent.resolve("duke.txt").toString()));
+
+        assertThrows(GaryException.class, tasks::undo);
+
+        assertEquals(1, tasks.size());
+        assertThrows(GaryException.class, tasks::undo);
     }
 
     @Test

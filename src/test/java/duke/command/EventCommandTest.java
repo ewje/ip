@@ -86,4 +86,37 @@ public class EventCommandTest {
         assertEquals(0, tasks.size());
         assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.getLastErrorMessage());
     }
+
+    @Test
+    public void execute_startAfterEnd_showsError() {
+        TaskList tasks = new TaskList();
+        CapturingUi ui = new CapturingUi();
+
+        new EventCommand("project meeting", "2026-08-27", "2026-08-26").execute(tasks, ui);
+
+        assertEquals(0, tasks.size());
+        assertEquals("The event start date must be before the end date.", ui.getLastErrorMessage());
+    }
+
+    @Test
+    public void execute_startSameAsEnd_showsError() {
+        TaskList tasks = new TaskList();
+        CapturingUi ui = new CapturingUi();
+
+        new EventCommand("project meeting", "2026-08-26", "2026-08-26").execute(tasks, ui);
+
+        assertEquals(0, tasks.size());
+        assertEquals("The event start date must be before the end date.", ui.getLastErrorMessage());
+    }
+
+    @Test
+    public void execute_nonExistentDate_showsError() {
+        TaskList tasks = new TaskList();
+        CapturingUi ui = new CapturingUi();
+
+        new EventCommand("project meeting", "2026-02-30", "2026-08-26").execute(tasks, ui);
+
+        assertEquals(0, tasks.size());
+        assertEquals("Please provide valid start and end dates in the format YYYY-MM-DD.", ui.getLastErrorMessage());
+    }
 }

@@ -1,12 +1,16 @@
 package duke;
 
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Scanner;
 
 import duke.command.Command;
 import duke.exception.GaryException;
 import duke.parser.Parser;
 import duke.storage.Storage;
+import duke.task.Task;
 import duke.task.TaskList;
+import duke.ui.GuiUi;
 import duke.ui.Ui;
 
 /**
@@ -18,6 +22,7 @@ public class Duke {
     private final TaskList tasks;
     private final Ui ui;
     private final Parser parser;
+    private final String startupError;
 
     /**
      * Creates a Duke application using the given file path for storage.
@@ -25,13 +30,25 @@ public class Duke {
      * @param filePath File path to load/save tasks.
      */
     public Duke(String filePath) {
-        assert filePath != null && !filePath.isBlank() : "Storage file path must be provided";
-
         this.ui = new Ui();
-        Storage storage = new Storage(filePath);
         this.parser = new Parser();
-        this.tasks = new TaskList(storage.load());
-        this.tasks.setStorage(storage);
+
+        Storage storage = null;
+        ArrayList<Task> loadedTasks = new ArrayList<>();
+        String loadingError = null;
+        try {
+            storage = new Storage(filePath);
+            loadedTasks = storage.load();
+        } catch (GaryException e) {
+            loadingError = e.getMessage()
+                    + " Gary started with an empty list; changes will not be saved in this session.";
+        }
+
+        this.startupError = loadingError;
+        this.tasks = new TaskList(loadedTasks);
+        if (storage != null && startupError == null) {
+            this.tasks.setStorage(storage);
+        }
     }
 
     /**
@@ -40,13 +57,17 @@ public class Duke {
     public void run() {
         Scanner scanner = new Scanner(System.in);
         ui.showWelcome();
+        if (startupError != null) {
+            ui.showError(startupError);
+        }
 
         boolean isExit = false;
         while (!isExit) {
             try {
                 if (!scanner.hasNextLine()) {
+                    isExit = true;
                     tasks.save();
-                    break;
+                    continue;
                 }
 
                 String fullCommand = scanner.nextLine().trim();
@@ -90,33 +111,40 @@ public class Duke {
     }
 
     /**
+     * Returns a storage warning detected while starting the application, if any.
+     *
+     * @return Optional user-facing startup error.
+     */
+    public Optional<String> getStartupError() {
+        return Optional.ofNullable(startupError);
+    }
+
+    /**
      * Processes one line of user input and returns its text and display type.
      *
      * @param input User input string.
-     * @return Response text together with whether it represents an error.
+     * @return Response text together with its error and exit states.
      */
     public CommandResponse getCommandResponse(String input) {
         String trimmedInput = input == null ? "" : input.trim();
         if (trimmedInput.isEmpty()) {
-            return new CommandResponse("Please enter a command.", true);
+            return new CommandResponse("Please enter a command.", true, false);
         }
 
-        duke.ui.GuiUi guiUi = new duke.ui.GuiUi();
+        GuiUi guiUi = new GuiUi();
+        boolean shouldExit = false;
         try {
             Command command = parser.parse(trimmedInput);
 
             assert command != null : "Parser must return a command for non-blank input";
             command.execute(tasks, guiUi);
-
-            if (command.isExit()) {
-                tasks.save();
-            }
+            shouldExit = command.isExit();
         } catch (GaryException e) {
             guiUi.showError(e.getMessage());
         }
 
         boolean isError = guiUi.hasError();
-        return new CommandResponse(guiUi.consumeOutput(), isError);
+        return new CommandResponse(guiUi.consumeOutput(), isError, shouldExit);
     }
 
     public static void main(String[] args) {

@@ -7,9 +7,9 @@ import java.time.LocalDate;
  */
 public class Event extends Task {
     /** Start date of the event. */
-    private LocalDate start;
+    private final LocalDate start;
     /** End date of the event. */
-    private LocalDate end;
+    private final LocalDate end;
 
     /**
      * Creates an event task.
@@ -22,6 +22,20 @@ public class Event extends Task {
         super(description);
         this.start = start;
         this.end = end;
+    }
+
+    /**
+     * Checks whether another event has the same description, start date, and end date.
+     *
+     * @param other Task to compare with.
+     * @return {@code true} if the event details match.
+     */
+    @Override
+    public boolean hasSameDetails(Task other) {
+        return other instanceof Event otherEvent
+                && super.hasSameDetails(other)
+                && start.equals(otherEvent.start)
+                && end.equals(otherEvent.end);
     }
 
     /**

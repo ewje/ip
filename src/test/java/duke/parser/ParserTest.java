@@ -2,8 +2,7 @@ package duke.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +17,7 @@ import duke.command.MarkCommand;
 import duke.command.TodoCommand;
 import duke.command.UndoCommand;
 import duke.command.UnknownCommand;
-import duke.task.TaskList;
-import duke.ui.CapturingUi;
+import duke.exception.GaryException;
 
 public class ParserTest {
 
@@ -104,36 +102,69 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_multipleWhitespaceBetweenArguments_returnsCommand() {
+        Command command = parser.parse("  event   project   meeting   /from   2026-08-25   /to   2026-08-26  ");
+        assertInstanceOf(EventCommand.class, command);
+    }
+
+    @Test
     public void parse_isCaseInsensitive() {
         Command command = parser.parse("LiSt");
         assertInstanceOf(ListCommand.class, command);
     }
 
     @Test
-    public void parse_deadlineWithoutByIndicator_createsCommandThatErrorsOnExecute() {
-        Command command = parser.parse("deadline return book");
-        assertInstanceOf(DeadlineCommand.class, command);
+    public void parse_deadlineWithoutByIndicator_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () -> parser.parse("deadline return book"));
 
-        TaskList tasks = new TaskList();
-        CapturingUi ui = new CapturingUi();
-        command.execute(tasks, ui);
-
-        assertEquals(0, tasks.size());
-        assertNotNull(ui.getLastErrorMessage());
-        assertNull(ui.getLastAddedTask());
+        assertEquals("Use: deadline <description> /by <YYYY-MM-DD>.", exception.getMessage());
     }
 
     @Test
-    public void parse_eventWithoutToIndicator_createsCommandThatErrorsOnExecute() {
-        Command command = parser.parse("event project meeting /from 2026-08-25");
-        assertInstanceOf(EventCommand.class, command);
+    public void parse_eventWithoutToIndicator_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () ->
+                parser.parse("event project meeting /from 2026-08-25"));
 
-        TaskList tasks = new TaskList();
-        CapturingUi ui = new CapturingUi();
-        command.execute(tasks, ui);
+        assertEquals("Use: event <description> /from <YYYY-MM-DD> /to <YYYY-MM-DD>.", exception.getMessage());
+    }
 
-        assertEquals(0, tasks.size());
-        assertNotNull(ui.getLastErrorMessage());
-        assertNull(ui.getLastAddedTask());
+    @Test
+    public void parse_deadlineWithRepeatedByIndicator_throwsGaryException() {
+        assertThrows(GaryException.class, () ->
+                parser.parse("deadline return book /by 2026-08-25 /by 2026-08-26"));
+    }
+
+    @Test
+    public void parse_eventWithRepeatedFromIndicator_throwsGaryException() {
+        assertThrows(GaryException.class, () -> parser.parse(
+                "event meeting /from 2026-08-25 /from 2026-08-26 /to 2026-08-27"));
+    }
+
+    @Test
+    public void parse_listWithArguments_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () -> parser.parse("list now"));
+
+        assertEquals("The list command does not take any arguments.", exception.getMessage());
+    }
+
+    @Test
+    public void parse_byeWithArguments_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () -> parser.parse("bye now"));
+
+        assertEquals("The bye command does not take any arguments.", exception.getMessage());
+    }
+
+    @Test
+    public void parse_blankInput_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () -> parser.parse("   "));
+
+        assertEquals("Please enter a command.", exception.getMessage());
+    }
+
+    @Test
+    public void parse_commandLongerThanLimit_throwsGaryException() {
+        GaryException exception = assertThrows(GaryException.class, () -> parser.parse("a".repeat(501)));
+
+        assertEquals("Commands cannot exceed 500 characters.", exception.getMessage());
     }
 }

@@ -1,5 +1,9 @@
 package duke.parser;
 
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import duke.command.ByeCommand;
 import duke.command.Command;
 import duke.command.DeadlineCommand;
@@ -11,6 +15,7 @@ import duke.command.MarkCommand;
 import duke.command.TodoCommand;
 import duke.command.UndoCommand;
 import duke.command.UnknownCommand;
+import duke.exception.GaryException;
 
 /**
  * Parses user input lines into {@link duke.command.Command} objects.
@@ -22,27 +27,47 @@ import duke.command.UnknownCommand;
  *   <li>Constructing the corresponding {@code Command} object.</li>
  * </ul>
  *
- * <p>Validation of argument correctness (e.g., date formats, missing fields) is delegated to
- * the individual {@code Command} implementations.</p>
+ * <p>This class validates command structure and reserved parameter markers. Semantic validation, such as checking
+ * whether a date exists, remains with the individual {@code Command} implementations.</p>
  */
 public class Parser {
+    private static final int MAX_COMMAND_LENGTH = 500;
+    private static final Pattern BY_MARKER_PATTERN = Pattern.compile("(?i)(?<!\\S)/by(?!\\S)");
+    private static final Pattern DEADLINE_PATTERN = Pattern.compile(
+            "^(.+?)\\s+/by\\s+(\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FROM_MARKER_PATTERN = Pattern.compile("(?i)(?<!\\S)/from(?!\\S)");
+    private static final Pattern TO_MARKER_PATTERN = Pattern.compile("(?i)(?<!\\S)/to(?!\\S)");
+    private static final Pattern EVENT_PATTERN = Pattern.compile(
+            "^(.+?)\\s+/from\\s+(\\S+)\\s+/to\\s+(\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
 
     /**
      * Parses a full user input line and returns a {@link Command} representing that input.
      *
      * @param userInput Full user input line.
      * @return A {@code Command} instance; returns {@link UnknownCommand} if the command keyword is not recognised.
+     * @throws GaryException If the input is blank or a known command has malformed syntax.
      */
     public Command parse(String userInput) {
-        assert userInput != null && !userInput.isBlank() : "Parser input must be non-blank";
+        if (userInput == null || userInput.isBlank()) {
+            throw new GaryException("Please enter a command.");
+        }
+        if (userInput.strip().length() > MAX_COMMAND_LENGTH) {
+            throw new GaryException("Commands cannot exceed " + MAX_COMMAND_LENGTH + " characters.");
+        }
 
-        String[] userSplit = userInput.trim().split(" ", 2);
-        String commandWord = userSplit[0].toUpperCase();
-        String arguments = (userSplit.length > 1) ? userSplit[1] : "";
+        String[] userSplit = userInput.strip().split("\\s+", 2);
+        String commandWord = userSplit[0].toUpperCase(Locale.ROOT);
+        String arguments = userSplit.length > 1 ? userSplit[1].strip() : "";
 
         return switch (commandWord) {
-            case "BYE" -> new ByeCommand();
-            case "LIST" -> new ListCommand();
+            case "BYE" -> {
+                requireNoArguments("bye", arguments);
+                yield new ByeCommand();
+            }
+            case "LIST" -> {
+                requireNoArguments("list", arguments);
+                yield new ListCommand();
+            }
             case "MARK" -> new MarkCommand(arguments, true);
             case "UNMARK" -> new MarkCommand(arguments, false);
             case "TODO" -> new TodoCommand(arguments);
@@ -64,10 +89,11 @@ public class Parser {
      * @return A {@link DeadlineCommand} carrying the extracted description and due date strings.
      */
     private Command parseDeadline(String arguments) {
-        String[] parts = arguments.split(" /by ", 2);
-        String description = parts.length > 0 ? parts[0] : "";
-        String dueDate = parts.length > 1 ? parts[1] : "";
-        return new DeadlineCommand(description, dueDate);
+        Matcher matcher = DEADLINE_PATTERN.matcher(arguments);
+        if (countMatches(BY_MARKER_PATTERN, arguments) != 1 || !matcher.matches()) {
+            throw new GaryException("Use: deadline <description> /by <YYYY-MM-DD>.");
+        }
+        return new DeadlineCommand(matcher.group(1), matcher.group(2));
     }
 
     /**
@@ -79,11 +105,27 @@ public class Parser {
      * @return An {@link EventCommand} carrying the extracted description, start date string, and end date string.
      */
     private Command parseEvent(String arguments) {
-        String[] fromParts = arguments.split(" /from ", 2);
-        String description = fromParts.length > 0 ? fromParts[0] : "";
-        String[] timeParts = (fromParts.length > 1) ? fromParts[1].split(" /to ", 2) : new String[0];
-        String start = timeParts.length > 0 ? timeParts[0] : "";
-        String end = timeParts.length > 1 ? timeParts[1] : "";
-        return new EventCommand(description, start, end);
+        Matcher matcher = EVENT_PATTERN.matcher(arguments);
+        if (countMatches(FROM_MARKER_PATTERN, arguments) != 1
+                || countMatches(TO_MARKER_PATTERN, arguments) != 1
+                || !matcher.matches()) {
+            throw new GaryException("Use: event <description> /from <YYYY-MM-DD> /to <YYYY-MM-DD>.");
+        }
+        return new EventCommand(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+
+    private int countMatches(Pattern pattern, String input) {
+        int count = 0;
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            count++;
+        }
+        return count;
+    }
+
+    private void requireNoArguments(String commandWord, String arguments) {
+        if (!arguments.isBlank()) {
+            throw new GaryException("The " + commandWord + " command does not take any arguments.");
+        }
     }
 }

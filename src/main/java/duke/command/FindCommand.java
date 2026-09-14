@@ -29,7 +29,7 @@ public class FindCommand extends Command {
      */
     @Override
     public void execute(TaskList tasks, Ui ui) {
-        String cleanedKeyword = keyword.trim();
+        String cleanedKeyword = keyword.trim().replaceAll("\\s+", " ");
         if (cleanedKeyword.isEmpty()) {
             ui.showError("The find keyword cannot be empty!");
             return;
