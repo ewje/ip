@@ -39,11 +39,16 @@ public class MarkCommand extends Command {
             throw new GaryException("Please indicate which task number to update!");
         }
 
+        String cleanedArgument = argument.trim();
+        if (!cleanedArgument.matches("[1-9]\\d*")) {
+            throw new GaryException("Please provide a positive whole-number task number.");
+        }
+
         int task;
         try {
-            task = Integer.parseInt(argument.trim()) - 1;
+            task = Integer.parseInt(cleanedArgument) - 1;
         } catch (NumberFormatException e) {
-            throw new GaryException("Please provide a valid number.");
+            throw new GaryException("That task number is too large.");
         }
 
         tasks.validateIndex(task);

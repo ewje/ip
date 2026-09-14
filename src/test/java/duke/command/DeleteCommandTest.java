@@ -32,7 +32,19 @@ public class DeleteCommandTest {
         GaryException exception = assertThrows(GaryException.class, () ->
                 new DeleteCommand("abc").execute(tasks, ui));
 
-        assertEquals("Please provide a valid number.", exception.getMessage());
+        assertEquals("Please provide a positive whole-number task number.", exception.getMessage());
+    }
+
+    @Test
+    public void execute_decimalNumber_throwsGaryException() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read book");
+        CapturingUi ui = new CapturingUi();
+
+        GaryException exception = assertThrows(GaryException.class, () ->
+                new DeleteCommand("1.0").execute(tasks, ui));
+
+        assertEquals("Please provide a positive whole-number task number.", exception.getMessage());
     }
 
     @Test

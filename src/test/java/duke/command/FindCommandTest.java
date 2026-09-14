@@ -45,6 +45,17 @@ public class FindCommandTest {
     }
 
     @Test
+    public void execute_keywordWithRepeatedWhitespace_normalizesAndShowsMatches() {
+        TaskList tasks = new TaskList();
+        tasks.addTodo("read the book");
+        CapturingUi ui = new CapturingUi();
+
+        new FindCommand("  the   book  ").execute(tasks, ui);
+
+        assertEquals(1, ui.getLastShownMatchingTasks().size());
+    }
+
+    @Test
     public void execute_keywordWithNoMatches_showsEmptyList() {
         TaskList tasks = new TaskList();
         tasks.addTodo("read book");
