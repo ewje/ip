@@ -1,12 +1,16 @@
 .root {
-    /* Modern neutral + accent palette (looked-up colors). */
-    surface-0: #0b1220;     /* app background */
-    surface-1: #111a2e;     /* input / panels */
-    surface-2: #172341;     /* hover */
-    text-0: #e6edf7;        /* primary text */
-    text-1: #a9b6d3;        /* secondary text */
-    accent: #6ea8ff;        /* primary accent */
-    accent-2: #8b5cf6;      /* secondary accent */
+    /* Shared neutral palette keeps the compact interface calm and legible. */
+    surface-0: #0d1117;
+    surface-1: #161b22;
+    surface-2: #21262d;
+    border: #30363d;
+    text-0: #e6edf3;
+    text-1: #8b949e;
+    accent: #58a6ff;
+    accent-hover: #79c0ff;
+    danger: #ff7b72;
+    danger-text: #ffdcd7;
+    danger-surface: rgba(248, 81, 73, 0.18);
 
     -fx-background-color: surface-0;
 }
@@ -15,28 +19,32 @@
     -fx-background-color: surface-1;
     -fx-text-fill: text-0;
     -fx-prompt-text-fill: text-1;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: border;
     -fx-border-width: 1px;
-    -fx-font: 15px "System";
-    -fx-padding: 10px 12px 10px 12px;
+    -fx-font: 14px "System";
+    -fx-padding: 8px 11px 8px 11px;
+}
+
+.text-field:focused {
+    -fx-border-color: accent;
 }
 
 .button {
     -fx-background-color: accent;
-    -fx-text-fill: #0b1220;
-    -fx-background-radius: 10px;
-    -fx-font: bold 14px "System";
-    -fx-padding: 8px 14px 8px 14px;
+    -fx-text-fill: surface-0;
+    -fx-background-radius: 8px;
+    -fx-font: bold 13px "System";
+    -fx-padding: 7px 12px 7px 12px;
 }
 
 .button:hover {
-    -fx-background-color: derive(accent, 12%);
+    -fx-background-color: accent-hover;
 }
 
 .button:pressed {
-    -fx-background-color: derive(accent, -10%);
+    -fx-background-color: derive(accent, -12%);
 }
 
 .scroll-pane,
@@ -44,13 +52,21 @@
     -fx-background-color: transparent;
 }
 
+.scroll-pane {
+    -fx-padding: 0;
+}
+
+.dialog-container {
+    -fx-padding: 2px 2px 6px 2px;
+}
+
 .scroll-bar {
-    -fx-font-size: 10px;  /* width/size hint */
+    -fx-font-size: 8px;
     -fx-background-color: transparent;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: rgba(230, 237, 247, 0.20);
+    -fx-background-color: rgba(139, 148, 158, 0.35);
     -fx-background-radius: 999px;
 }
 

@@ -37,7 +37,7 @@ public class GuiUi extends Ui {
 
     private void appendLine(String line) {
         if (output.length() > 0) {
-            output.append(System.lineSeparator());
+            output.append('\n');
         }
         output.append(line);
     }

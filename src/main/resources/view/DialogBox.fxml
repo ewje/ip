@@ -8,12 +8,13 @@
          xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          alignment="TOP_RIGHT"
-         spacing="10.0"
+         spacing="7.0"
          stylesheets="@../css/dialog-box.css"
          styleClass="dialog-box">
     <children>
         <Label fx:id="dialog" wrapText="true" styleClass="dialog-label" />
-        <ImageView fx:id="displayPicture" id="displayPicture"
-                   fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+        <ImageView fx:id="displayPicture"
+                   fitHeight="40.0" fitWidth="40.0" pickOnBounds="true"
+                   preserveRatio="true" styleClass="display-picture" />
     </children>
 </fx:root>
